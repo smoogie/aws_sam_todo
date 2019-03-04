@@ -8,9 +8,61 @@ Globals:
   Function:
     Runtime: nodejs8.10
 Resources:
+  ToDoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Released
+      Name: todo-app
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          version: '0.1'
+          title: 'Todo API'
+        definitions:
+          VersionResponse:
+            title: 'version response'
+            type: object
+            required:
+              - accepted
+            properties:
+              accepted:
+                type: bool
+        paths:
+          /version:
+            get:
+              produces:
+                - application/json
+              responses:
+                '200':
+                  description: 'A JSON with info about version validation'
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: string
+                  content:
+                    application/json:
+                      schema:
+                        $ref: '#/definitions/VersionResponse'
+              summary: 'verify your version'
+              x-amazon-apigateway-integration:
+                uri:
+                  'Fn::Sub': arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VersionValidationFunction.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: '200'
+                passthroughBehavior: 'when_no_templates'
+                httpMethod: POST
+                type: aws
   VersionValidationFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Name: version-validate
     Properties:
       CodeUri: ./src
       Handler: actions/versions/validate.handler
+      Events:
+        AppVersionValidation:
+          Type: Api
+          Properties:
+            Path: /version
+            Method: get
+            RestApiId:
+              Ref: ToDoApi
