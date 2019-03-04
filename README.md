@@ -19,3 +19,13 @@ System will support few languages.
 This repo is not build to present best practice in code or even best use case for services. It is build to present example code for solution which I used in much bigger and more complex app, which required specific solutions. In many cases you can build it in simpler way, but presented here example may help you with few problems...
 
 Most user data will be kept on MySQL DB. When we want to search data based on data from user profile, we do not need to request users from AWS Cognito, we can do it with one SQL request. E.g. if we want to create report how many todo items come form NY we can create one SQL query and join users with todo.
+
+# cmds
+create package.yaml
+- aws --region *$region* cloudformation package --template-file template.yaml --s3-bucket *$code_bucket* --output-template-file package.yaml
+
+deploy app
+- aws cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM --parameter-overrides DbHost=*$db-name* DbUser=*$db-user* DbName=*$db-name* DbPassword=*$db-password*
+
+get stack information
+- aws cloudformation describe-stacks *$your-stack-name* 
