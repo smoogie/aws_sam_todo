@@ -25,7 +25,7 @@ create package.yaml
 - aws --region *$region* cloudformation package --template-file template.yaml --s3-bucket *$code_bucket* --output-template-file package.yaml
 
 deploy app
-- aws cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM --parameter-overrides DbHost=*$db-name* DbUser=*$db-user* DbName=*$db-name* DbPassword=*$db-password*
+- aws cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM --parameter-overrides DBUser=*$db-user* DBName=*$db-name* DBPassword=*$db-password*
 
 get stack information
-- aws cloudformation describe-stacks *$your-stack-name* 
+- aws cloudformation describe-stacks --stack-name  *$your-stack-name* 
