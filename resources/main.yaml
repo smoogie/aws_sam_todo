@@ -1,0 +1,16 @@
+# Example yaml file
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: |
+  todo-app
+  Main SAM Template for todo app
+
+# Param definition
+Parameters:
+  $include: ./config/params.yaml
+# Global configuration
+Globals:
+  $include: ./config/globals.yaml
+# Outputs values
+Outputs:
+  $include: ./config/outputs.yaml

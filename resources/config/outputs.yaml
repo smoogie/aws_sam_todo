@@ -1,0 +1,4 @@
+ApiUri:
+  Value: { "Fn::Sub" : "https://${ToDoApi}.execute-api.${AWS::Region}.amazonaws.com/Released"}
+DB:
+  Value: { "Fn::GetAtt": ["ToDoDB","Endpoint.Address"]}

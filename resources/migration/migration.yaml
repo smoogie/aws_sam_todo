@@ -1,0 +1,26 @@
+Resources:
+  #IAM configuration
+  MigrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  # Lambda Configuration
+  MigrationFunction:
+    Type: AWS::Serverless::Function
+    Name: 'migrations'
+    Properties:
+      Role:
+        Fn::Sub: '${MigrationRole.Arn}'
+      CodeUri: ./database
+      Handler: migration.handler
