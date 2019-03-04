@@ -4,15 +4,32 @@ Transform: 'AWS::Serverless-2016-10-31'
 Description: |
   todo-app
   Main SAM Template for todo app
+Parameters:
+  DbHost:
+    Type: String
+    Description: your db host
+  DbUser:
+    Type: String
+    Description: your db user
+  DbName:
+    Type: String
+    Description: your db name
+  DbPassword:
+    Type: String
+    Description: your db password
 Globals:
   Function:
     Runtime: nodejs8.10
     Environment:
       Variables:
-        DB_HOST: <here your DB host>
-        DB_USER: <here your DB user>
-        DB_PASSWORD: <here your DB password>
-        DB_NAME: <here your DB name>
+        DB_HOST:
+          Ref: DbHost
+        DB_USER:
+          Ref: DbUser
+        DB_PASSWORD:
+          Ref: DbName
+        DB_NAME:
+          Ref: DbPassword
 Resources:
   ToDoUserPool:
     Type: AWS::Cognito::UserPool
@@ -173,3 +190,6 @@ Resources:
                 requestTemplates: *PassThroughTemplate
                 httpMethod: POST
                 type: aws
+Outputs:
+  ApiUri:
+    Value: { "Fn::Sub" : "https://${ToDoApi}.execute-api.${AWS::Region}.amazonaws.com/Released"}
