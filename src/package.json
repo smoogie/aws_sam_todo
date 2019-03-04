@@ -2,7 +2,9 @@
   "name": "todo",
   "version": "1.0.0",
   "description": "Todo serverless appplication",
-  "dependencies": {},
+  "dependencies": {
+    "mysql2": "^1.6.5"
+  },
   "scripts": {},
   "devDependencies": {}
 }
