@@ -17,3 +17,5 @@ User can add, edit, delete positions on the list. User can attach files to posit
 System will support few languages.
 
 This repo is not build to present best practice in code or even best use case for services. It is build to present example code for solution which I used in much bigger and more complex app, which required specific solutions. In many cases you can build it in simpler way, but presented here example may help you with few problems...
+
+Most user data will be kept on MySQL DB. When we want to search data based on data from user profile, we do not need to request users from AWS Cognito, we can do it with one SQL request. E.g. if we want to create report how many todo items come form NY we can create one SQL query and join users with todo.
