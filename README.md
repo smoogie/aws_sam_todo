@@ -20,12 +20,16 @@ This repo is not build to present best practice in code or even best use case fo
 
 Most user data will be kept on MySQL DB. When we want to search data based on data from user profile, we do not need to request users from AWS Cognito, we can do it with one SQL request. E.g. if we want to create report how many todo items come form NY we can create one SQL query and join users with todo.
 
+# deploy + update
+When you update stack remember to make DB backup and verify/reproduce DB after deployment. You need to change DB Instance Name. For more info check : https://aws.amazon.com/premiumsupport/knowledge-center/cloudformation-custom-name/
+
+
 # cmds
 create package.yaml
 - aws --region *$region* cloudformation package --template-file template.yaml --s3-bucket *$code_bucket* --output-template-file package.yaml
 
 deploy app
-- aws cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM --parameter-overrides DBUser=*$db-user* DBName=*$db-name* DBPassword=*$db-password*
+- aws --region *$region* cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM --parameter-overrides DBUser=*$db-user* DBName=*$db-name* DBPassword=*$db-password*
 
 get stack information
 - aws cloudformation describe-stacks --stack-name  *$your-stack-name* 

@@ -35,6 +35,13 @@ Parameters:
 Globals:
   Function:
     Runtime: nodejs8.10
+    VpcConfig:
+      SecurityGroupIds:
+        - Ref: LambdaSecurityGroup
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+        - Ref: PrivateSubnet3
     Environment:
       Variables:
         DB_HOST:
@@ -48,6 +55,257 @@ Globals:
 
 # All resources
 Resources:
+  # VPC configuration
+  MainVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+  # Subnet for VPC
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.0.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.16.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.32.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 2
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.48.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.64.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.80.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 2
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  # RouteTable
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: MainVPC
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: MainVPC
+  # Route Subnet association
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet1
+      RouteTableId:
+        Ref: PrivateRouteTable
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet2
+      RouteTableId:
+        Ref: PrivateRouteTable
+  PrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet3
+      RouteTableId:
+        Ref: PrivateRouteTable
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet2
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet3
+      RouteTableId:
+        Ref: PublicRouteTable
+  # InternetGateway for VPC
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  AttachInternetGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      InternetGatewayId:
+        Ref: InternetGateway
+  # NAT and Elastic IP for VPC
+  NAT:
+    DependsOn: AttachInternetGateway
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - EIP
+          - AllocationId
+      SubnetId:
+        Ref: PrivateSubnet1
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  # Route Subnet association
+  RouteToInternetGateway:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  RouteToNAT:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NAT
+  # Security Groups
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'Lambda security group'
+      VpcId:
+        Ref: MainVPC
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'RDS security group'
+      VpcId:
+        Ref: MainVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId :
+            Ref: LambdaSecurityGroup
+  # RDS Subnet Group
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: 'DB subnet group'
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+        - Ref: PrivateSubnet3
+  # RDS Configuration
+  ToDoDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      DBInstanceClass: db.t2.micro
+      Engine: MySQL
+      EngineVersion: 5.7.23
+      PubliclyAccessible: true
+      DBName:
+        Ref: DBName
+      MasterUsername:
+        Ref: DBUser
+      MasterUserPassword:
+        Ref: DBPassword
+      DeletionProtection: false
+      DBSubnetGroupName:
+        Ref: DBSubnetGroup
+      VPCSecurityGroups:
+        - Ref: RDSSecurityGroup
+
+  #IAM configuration
+  GetUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  VersionValidationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
   # Cognito Configuration
   ToDoUserPool:
     Type: AWS::Cognito::UserPool
@@ -63,30 +321,13 @@ Resources:
           Name: email
           Required: false
 
-  # RDS Configuration
-  ToDoDB:
-    Type: AWS::RDS::DBInstance
-    Properties:
-      AllocatedStorage: 5
-      DBInstanceClass: db.t2.micro
-      Engine: MySQL
-      EngineVersion: 5.7.23
-      PubliclyAccessible: true
-      DBInstanceIdentifier:
-        Ref: DBName
-      DBName:
-        Ref: DBName
-      MasterUsername:
-        Ref: DBUser
-      MasterUserPassword:
-        Ref: DBPassword
-      DeletionProtection: false
-
   # Lambda Configuration
   GetUserFunction:
     Type: AWS::Serverless::Function
-    Name: get-user
+    Name: 'get-user'
     Properties:
+      Role:
+        Fn::Sub: '${GetUserRole.Arn}'
       CodeUri: ./src
       Handler: actions/users/get_data.handler
       Events:
@@ -99,8 +340,10 @@ Resources:
               Ref: ToDoApi
   VersionValidationFunction:
     Type: AWS::Serverless::Function
-    Name: version-validate
+    Name: 'version-validate'
     Properties:
+      Role:
+        Fn::Sub: '${VersionValidationRole.Arn}'
       CodeUri: ./src
       Handler: actions/versions/validate.handler
       Events:
@@ -117,12 +360,12 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Released
-      Name: todo-app
+      Name: 'todo-app'
       Auth:
         Authorizers:
           ToDoCognitoAuthorizer:
             UserPoolArn:
-              'Fn::Sub': '${ToDoUserPool.Arn}'
+              Fn::Sub: '${ToDoUserPool.Arn}'
       DefinitionBody:
         swagger: '2.0'
         info:
@@ -193,7 +436,7 @@ Resources:
                       type: string
               x-amazon-apigateway-integration:
                 uri:
-                  'Fn::Sub': arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUserFunction.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUserFunction.Arn}/invocations
                 responses:
                   default:
                     statusCode: 200
@@ -224,11 +467,11 @@ Resources:
               summary: 'verify your version'
               x-amazon-apigateway-integration:
                 uri:
-                  'Fn::Sub': arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VersionValidationFunction.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VersionValidationFunction.Arn}/invocations
                 responses:
                   default:
-                    statusCode: '200'
-                passthroughBehavior: 'when_no_templates'
+                    statusCode: 200
+                passthroughBehavior: when_no_templates
                 requestTemplates: *PassThroughTemplate
                 httpMethod: POST
                 type: aws
