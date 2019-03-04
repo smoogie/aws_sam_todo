@@ -305,7 +305,36 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-
+  MigrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  SeederRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
   # Cognito Configuration
   ToDoUserPool:
     Type: AWS::Cognito::UserPool
@@ -322,6 +351,22 @@ Resources:
           Required: false
 
   # Lambda Configuration
+  MigrationFunction:
+    Type: AWS::Serverless::Function
+    Name: 'migrations'
+    Properties:
+      Role:
+        Fn::Sub: '${MigrationRole.Arn}'
+      CodeUri: ./database
+      Handler: migration.handler
+  SeederFunction:
+    Type: AWS::Serverless::Function
+    Name: 'seeder'
+    Properties:
+      Role:
+        Fn::Sub: '${SeederRole.Arn}'
+      CodeUri: ./database
+      Handler: seeder.handler
   GetUserFunction:
     Type: AWS::Serverless::Function
     Name: 'get-user'

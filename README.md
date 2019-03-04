@@ -31,5 +31,8 @@ create package.yaml
 deploy app
 - aws --region *$region* cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM --parameter-overrides DBUser=*$db-user* DBName=*$db-name* DBPassword=*$db-password*
 
+update app
+- aws --region *$region* cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM
+
 get stack information
 - aws cloudformation describe-stacks --stack-name  *$your-stack-name* 

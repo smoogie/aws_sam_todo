@@ -1,0 +1,13 @@
+{
+  "name": "todo_migrations",
+  "version": "1.0.0",
+  "description": "db migrations for todo app",
+  "dependencies": {
+    "bluebird": "^3.5.3",
+    "mysql2": "^1.6.5",
+    "sequelize": "^4.43.0",
+    "umzug": "^2.2.0"
+  },
+  "scripts": {},
+  "devDependencies": {}
+}
