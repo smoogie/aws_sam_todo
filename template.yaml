@@ -1,0 +1,16 @@
+# Example yaml file
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: |
+  todo-app
+  Main SAM Template for todo app
+Globals:
+  Function:
+    Runtime: nodejs8.10
+Resources:
+  VersionValidationFunction:
+    Type: 'AWS::Serverless::Function'
+    Name: version-validate
+    Properties:
+      CodeUri: ./src
+      Handler: actions/versions/validate.handler
