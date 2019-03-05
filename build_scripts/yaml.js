@@ -21,7 +21,7 @@ const mergedTemplate = merger.merge([
     'tmp/main_merged.yaml',
     'resources/other/*.yaml',
     'resources/migration/*.yaml',
-    'resources/lambdas/*.yaml',
+    'resources/lambdas/*/*.yaml',
     'tmp/api_resource.yaml'
 ]);
 fs.writeFileSync('build.yaml', mergedTemplate);

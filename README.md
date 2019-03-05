@@ -23,8 +23,19 @@ Most user data will be kept on MySQL DB. When we want to search data based on da
 # deploy + update
 When you update stack remember to make DB backup and verify/reproduce DB after deployment. You need to change DB Instance Name. For more info check : https://aws.amazon.com/premiumsupport/knowledge-center/cloudformation-custom-name/
 
+# npm shorthands for aws cmds 
+#### Before you'll use it, copy .npmrc.example to .npmrc and fill with correct data
+- npm run yaml:test - build final yaml template
+- npm run pack:test - pack current app version
+- npm run init:stack:test - init stack on aws
+- npm run update:stack:test - update stack on aws
+- npm run describe:test - get stack information
+- npm run init:test - yaml:test + pack:test + init:stack:test
+- npm run update:test - yaml:test + pack:test + update:stack:test
 
-# cmds
+#### If you use Windows add :w at the end of command (the command "npm run yaml:test" is the exception). E.g. npm run init:test:w
+
+# aws cmds
 create package.yaml
 - aws --region *$region* cloudformation package --template-file template.yaml --s3-bucket *$code_bucket* --output-template-file package.yaml
 
@@ -35,4 +46,4 @@ update app
 - aws --region *$region* cloudformation deploy --template-file package.yaml --stack-name *$your-stack-name* --capabilities CAPABILITY_IAM
 
 get stack information
-- aws cloudformation describe-stacks --stack-name  *$your-stack-name* 
+- aws --region *$region* cloudformation describe-stacks --stack-name  *$your-stack-name* 
