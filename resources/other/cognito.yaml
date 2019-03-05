@@ -1,0 +1,15 @@
+Resources:
+  # Cognito Configuration
+  ToDoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: ToDoUserPool
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      UsernameAttributes:
+        - email
+      Schema:
+        - AttributeDataType: String
+          Name: email
+          Required: false

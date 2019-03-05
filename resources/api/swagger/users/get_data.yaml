@@ -1,0 +1,22 @@
+paths:
+  /user:
+    get:
+      security:
+        - ToDoCognitoAuthorizer: []
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 'A JSON with info about user'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+      x-amazon-apigateway-integration:
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUserFunction.Arn}/invocations
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws

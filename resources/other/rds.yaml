@@ -1,0 +1,30 @@
+Resources:
+  # RDS Subnet Group
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: 'DB subnet group'
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+        - Ref: PrivateSubnet3
+  # RDS Configuration
+  ToDoDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      DBInstanceClass: db.t2.micro
+      Engine: MySQL
+      EngineVersion: 5.7.23
+      PubliclyAccessible: true
+      DBName:
+        Ref: DBName
+      MasterUsername:
+        Ref: DBUser
+      MasterUserPassword:
+        Ref: DBPassword
+      DeletionProtection: false
+      DBSubnetGroupName:
+        Ref: DBSubnetGroup
+      VPCSecurityGroups:
+        - Ref: RDSSecurityGroup

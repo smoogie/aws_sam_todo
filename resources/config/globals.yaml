@@ -1,0 +1,19 @@
+Function:
+  Runtime: nodejs8.10
+  VpcConfig:
+    SecurityGroupIds:
+      - Ref: LambdaSecurityGroup
+    SubnetIds:
+      - Ref: PrivateSubnet1
+      - Ref: PrivateSubnet2
+      - Ref: PrivateSubnet3
+  Environment:
+    Variables:
+      DB_HOST:
+        Fn::GetAtt: ToDoDB.Endpoint.Address
+      DB_USER:
+        Ref: DBUser
+      DB_PASSWORD:
+        Ref: DBPassword
+      DB_NAME:
+        Ref: DBName

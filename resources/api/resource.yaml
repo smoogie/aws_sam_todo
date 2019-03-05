@@ -1,0 +1,14 @@
+Resources:
+  # Api gateway definition with swagger
+  ToDoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Released
+      Name: 'todo-app'
+      Auth:
+        Authorizers:
+          ToDoCognitoAuthorizer:
+            UserPoolArn:
+              Fn::Sub: '${ToDoUserPool.Arn}'
+      DefinitionBody:
+        $include: ./api.yaml

@@ -1,0 +1,6 @@
+aws_test_region = "aws-region-for-your-app-test-deployment"
+aws_test_bucket = "your-code-bucket-test-deployment"
+aws_test_stack = "name-of-your-stack-test-deployment"
+aws_test_dbname = "name-of-your-db-test-deployment"
+aws_test_dbuser = "user-for-your-db-test-deployment"
+aws_test_dbpassword = "password-for-user-for-your-db-test-deployment"
