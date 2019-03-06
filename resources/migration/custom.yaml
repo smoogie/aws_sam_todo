@@ -1,5 +1,6 @@
 Resources:
   MigrateResource:
+    DependsOn: MigrationFunction
     Type: "Custom::MigrationResource"
     Properties:
       ServiceToken:
@@ -7,6 +8,7 @@ Resources:
   SeedResource:
     DependsOn:
       - MigrateResource
+      - SeederFunction
     Type: "Custom::SeedResource"
     Properties:
       ServiceToken:

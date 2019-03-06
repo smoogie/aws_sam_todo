@@ -1,6 +1,9 @@
 Resources:
   # Api gateway definition with swagger
   ToDoApi:
+    DependsOn:
+      - ToDoUserPool
+      - ToDoDB
     Type: AWS::Serverless::Api
     Properties:
       StageName: Released

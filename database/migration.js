@@ -6,10 +6,10 @@ exports.handler = async (event, context) => {
     try {
         migrations = await umzug.up();
         console.log(migrations);
-        cfResponse.send(event, context, cfresponse.SUCCESS, {});
+        cfResponse.send(event, context, cfResponse.SUCCESS, {});
     } catch (error) {
         console.log(error);
-        cfResponse.send(event, context, cfresponse.FAILED, {});
+        cfResponse.send(event, context, cfResponse.FAILED, {});
         return false;
     }
     return true;

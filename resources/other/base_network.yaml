@@ -8,6 +8,7 @@ Resources:
       EnableDnsHostnames: true
   # Subnet for VPC
   PrivateSubnet1:
+    DependsOn: MainVPC
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -19,6 +20,7 @@ Resources:
           - Fn::GetAZs:
               Ref: AWS::Region
   PrivateSubnet2:
+    DependsOn: MainVPC
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -30,6 +32,7 @@ Resources:
           - Fn::GetAZs:
               Ref: AWS::Region
   PrivateSubnet3:
+    DependsOn: MainVPC
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -41,6 +44,7 @@ Resources:
           - Fn::GetAZs:
               Ref: AWS::Region
   PublicSubnet1:
+    DependsOn: MainVPC
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -52,6 +56,7 @@ Resources:
           - Fn::GetAZs:
               Ref: AWS::Region
   PublicSubnet2:
+    DependsOn: MainVPC
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -63,6 +68,7 @@ Resources:
           - Fn::GetAZs:
               Ref: AWS::Region
   PublicSubnet3:
+    DependsOn: MainVPC
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
@@ -75,17 +81,22 @@ Resources:
               Ref: AWS::Region
   # RouteTable
   PrivateRouteTable:
+    DependsOn: MainVPC
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId:
         Ref: MainVPC
   PublicRouteTable:
+    DependsOn: MainVPC
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId:
         Ref: MainVPC
   # Route Subnet association
   PrivateSubnet1RouteTableAssociation:
+    DependsOn:
+      - PrivateRouteTable
+      - PrivateSubnet1
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
@@ -93,6 +104,9 @@ Resources:
       RouteTableId:
         Ref: PrivateRouteTable
   PrivateSubnet2RouteTableAssociation:
+    DependsOn:
+      - PrivateRouteTable
+      - PrivateSubnet2
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
@@ -100,6 +114,9 @@ Resources:
       RouteTableId:
         Ref: PrivateRouteTable
   PrivateSubnet3RouteTableAssociation:
+    DependsOn:
+      - PrivateRouteTable
+      - PrivateSubnet3
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
@@ -107,6 +124,9 @@ Resources:
       RouteTableId:
         Ref: PrivateRouteTable
   PublicSubnet1RouteTableAssociation:
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet1
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
@@ -114,6 +134,9 @@ Resources:
       RouteTableId:
         Ref: PublicRouteTable
   PublicSubnet2RouteTableAssociation:
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet2
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
@@ -121,6 +144,9 @@ Resources:
       RouteTableId:
         Ref: PublicRouteTable
   PublicSubnet3RouteTableAssociation:
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet3
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId:
@@ -129,8 +155,12 @@ Resources:
         Ref: PublicRouteTable
   # InternetGateway for VPC
   InternetGateway:
+    DependsOn: MainVPC
     Type: AWS::EC2::InternetGateway
   AttachInternetGateway:
+    DependsOn:
+      - MainVPC
+      - InternetGateway
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId:
@@ -138,8 +168,16 @@ Resources:
       InternetGatewayId:
         Ref: InternetGateway
   # NAT and Elastic IP for VPC
+  EIP:
+    DependsOn: MainVPC
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
   NAT:
-    DependsOn: AttachInternetGateway
+    DependsOn:
+      - AttachInternetGateway
+      - EIP
+      - PrivateSubnet1
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId:
@@ -148,12 +186,11 @@ Resources:
           - AllocationId
       SubnetId:
         Ref: PrivateSubnet1
-  EIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
   # Route Subnet association
   RouteToInternetGateway:
+    DependsOn:
+      - PublicRouteTable
+      - InternetGateway
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
@@ -162,6 +199,9 @@ Resources:
       GatewayId:
         Ref: InternetGateway
   RouteToNAT:
+    DependsOn:
+      - PrivateRouteTable
+      - NAT
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
