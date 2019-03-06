@@ -1,12 +1,15 @@
 const umzugInitializer = require('init_umzug');
+const cfResponse = require('cfresponse');
 
 exports.handler = async (event, context) => {
     umzug = umzugInitializer.init('./seeds', 'seeds');
     try {
         migrations = await umzug.up();
         console.log(migrations);
+        cfResponse.send(event, context, cfnresponse.SUCCESS, {});
     } catch (error) {
         console.log(error);
+        cfResponse.send(event, context, cfnresponse.FAILED, {});
         return false;
     }
     return true;
