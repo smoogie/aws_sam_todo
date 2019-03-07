@@ -1,12 +1,17 @@
 Resources:
   # Security Groups
   LambdaSecurityGroup:
+    DependsOn:
+      - PrivateSubnet1RouteTableAssociation
+      - PrivateSubnet2RouteTableAssociation
+      - PrivateSubnet3RouteTableAssociation
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: 'Lambda security group'
       VpcId:
         Ref: MainVPC
   RDSSecurityGroup:
+    DependsOn: LambdaSecurityGroup
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: 'RDS security group'

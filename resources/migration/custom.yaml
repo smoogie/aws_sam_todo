@@ -1,0 +1,19 @@
+Resources:
+  MigrateResource:
+    DependsOn: MigrationFunction
+    Type: "Custom::MigrationResource"
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: MigrationFunction.Arn
+      Version:
+        Ref: DeployVersion
+  SeedResource:
+    DependsOn:
+      - MigrateResource
+      - SeederFunction
+    Type: "Custom::SeedResource"
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: SeederFunction.Arn
+      Version:
+        Ref: DeployVersion

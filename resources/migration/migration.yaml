@@ -1,6 +1,7 @@
 Resources:
   #IAM configuration
   MigrationRole:
+    DependsOn: ToDoDB
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -17,9 +18,11 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
   # Lambda Configuration
   MigrationFunction:
+    DependsOn: MigrationRole
     Type: AWS::Serverless::Function
     Name: 'migrations'
     Properties:
+      Timeout: 60
       Role:
         Fn::Sub: '${MigrationRole.Arn}'
       CodeUri: ./database

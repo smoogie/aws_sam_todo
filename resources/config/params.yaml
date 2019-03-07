@@ -21,3 +21,8 @@ DBPassword:
   MaxLength: 41
   AllowedPattern: '[a-zA-Z0-9]*'
   ConstraintDescription: 'Must contain only alphanumeric characters.'
+DeployVersion:
+  Type: String
+  NoEcho: true
+  Description: 'timestamp to update customresources'
+  Default: 'init'

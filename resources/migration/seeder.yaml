@@ -1,6 +1,7 @@
 Resources:
   #IAM configuration
   SeederRole:
+    DependsOn: ToDoDB
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -16,9 +17,13 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
   SeederFunction:
+    DependsOn:
+      - SeederRole
+      - MigrationFunction
     Type: AWS::Serverless::Function
     Name: 'seeder'
     Properties:
+      Timeout: 60
       Role:
         Fn::Sub: '${SeederRole.Arn}'
       CodeUri: ./database

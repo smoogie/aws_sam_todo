@@ -2,29 +2,28 @@ const Sequelize = require('sequelize');
 
 module.exports = {
     up: function(queryInterface, DataTypes) {
-        return queryInterface.createTable('system_versions', {
+        return queryInterface.createTable('users', {
             id: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 primaryKey: true,
                 autoIncrement: true
             },
-            weight: {
-                type: DataTypes.INTEGER,
+            email: {
+                type: DataTypes.TEXT,
                 allowNull: false
             },
-            system: {
-                type: DataTypes.STRING(255),
+            firstName: {
+                type: DataTypes.TEXT,
                 allowNull: true
             },
-            version: {
-                type: DataTypes.STRING(255),
-                allowNull: false
+            lastName: {
+                type: DataTypes.TEXT,
+                allowNull: true
             },
-            min: {
-                type: DataTypes.BOOLEAN,
-                allowNull: false,
-                defaultValue: false
+            cognito_id: {
+                type: DataTypes.TEXT,
+                allowNull: true
             },
             createdAt: {
                 type: DataTypes.DATE,

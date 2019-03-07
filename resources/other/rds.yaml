@@ -1,6 +1,10 @@
 Resources:
   # RDS Subnet Group
   DBSubnetGroup:
+    DependsOn:
+      - PrivateSubnet1RouteTableAssociation
+      - PrivateSubnet2RouteTableAssociation
+      - PrivateSubnet3RouteTableAssociation
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupDescription: 'DB subnet group'
@@ -10,6 +14,10 @@ Resources:
         - Ref: PrivateSubnet3
   # RDS Configuration
   ToDoDB:
+    DependsOn:
+     - DBSubnetGroup
+     - RDSSecurityGroup
+     - AttachInternetGateway
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: 20
