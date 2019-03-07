@@ -5,6 +5,8 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: MigrationFunction.Arn
+      Version:
+        Ref: DeployVersion
   SeedResource:
     DependsOn:
       - MigrateResource
@@ -13,3 +15,5 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: SeederFunction.Arn
+      Version:
+        Ref: DeployVersion
