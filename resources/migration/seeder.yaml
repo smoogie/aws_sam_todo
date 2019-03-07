@@ -23,6 +23,7 @@ Resources:
     Type: AWS::Serverless::Function
     Name: 'seeder'
     Properties:
+      Timeout: 60
       Role:
         Fn::Sub: '${SeederRole.Arn}'
       CodeUri: ./database

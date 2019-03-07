@@ -22,6 +22,7 @@ Resources:
     Type: AWS::Serverless::Function
     Name: 'migrations'
     Properties:
+      Timeout: 60
       Role:
         Fn::Sub: '${MigrationRole.Arn}'
       CodeUri: ./database

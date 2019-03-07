@@ -17,6 +17,7 @@ Resources:
     DependsOn:
      - DBSubnetGroup
      - RDSSecurityGroup
+     - AttachInternetGateway
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: 20

@@ -7,7 +7,6 @@ Resources:
     DependsOn:
       - MainVPC
       - InternetGateway
-      - EIP
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId:
@@ -16,14 +15,16 @@ Resources:
         Ref: InternetGateway
   # NAT and Elastic IP for VPC
   EIP:
-    DependsOn: MainVPC
+    DependsOn:
+      - MainVPC
+      - AttachInternetGateway
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
   NAT:
     DependsOn:
       - AttachInternetGateway
-      - PrivateSubnet1
+      - PublicSubnet1
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId:
@@ -31,7 +32,7 @@ Resources:
           - EIP
           - AllocationId
       SubnetId:
-        Ref: PrivateSubnet1
+        Ref: PublicSubnet1
   # Route Subnet association
   RouteToInternetGateway:
     DependsOn:

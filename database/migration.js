@@ -6,7 +6,7 @@ exports.handler = async (event, context) => {
     try {
         migrations = await umzug.up();
         console.log(migrations);
-        cfResponse.send(event, context, cfResponse.SUCCESS, {});
+        let cfResult = await cfResponse.send(event, context, cfResponse.SUCCESS, {});
     } catch (error) {
         console.log(error);
         cfResponse.send(event, context, cfResponse.FAILED, {});
