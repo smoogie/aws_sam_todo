@@ -9,6 +9,7 @@ Function:
       - Ref: PrivateSubnet3
   Environment:
     Variables:
+      # TODO: add cognito access
       DB_HOST:
         Fn::GetAtt: ToDoDB.Endpoint.Address
       DB_USER:
@@ -17,3 +18,7 @@ Function:
         Ref: DBPassword
       DB_NAME:
         Ref: DBName
+      S3_PUBLIC_DATA:
+        Ref: DataS3BucketName
+      DEPLOYMENT_REGION:
+        Ref: AWS::Region

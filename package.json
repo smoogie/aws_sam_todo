@@ -12,14 +12,14 @@
   "scripts": {
     "yaml:test": "node build_scripts/yaml.js",
     "pack:test": "aws --region $npm_config_aws_test_region cloudformation package --template-file build.yaml --s3-bucket $npm_config_aws_test_bucket --output-template-file package.yaml",
-    "init:stack:test": "aws --region $npm_config_aws_test_region cloudformation deploy --template-file package.yaml --stack-name $npm_config_aws_test_stack --capabilities CAPABILITY_IAM --parameter-overrides DBUser=$npm_config_aws_test_dbuser DBName=$npm_config_aws_test_dbname DBPassword=$npm_config_aws_test_dbpassword",
+    "init:stack:test": "aws --region $npm_config_aws_test_region cloudformation deploy --template-file package.yaml --stack-name $npm_config_aws_test_stack --capabilities CAPABILITY_IAM --parameter-overrides DBUser=$npm_config_aws_test_dbuser DBName=$npm_config_aws_test_dbname DBPassword=$npm_config_aws_test_dbpassword DataS3BucketName=$npm_config_aws_test_databucket",
     "update:stack:test": "aws --region $npm_config_aws_test_region cloudformation deploy --template-file package.yaml --stack-name $npm_config_aws_test_stack --capabilities CAPABILITY_IAM --parameter-overrides \"DeployVersion=$(date +'%s')\"",
     "describe:test": "aws --region $npm_config_aws_test_region cloudformation describe-stacks --stack-name $npm_config_aws_test_stack",
     "init:test": "npm run yaml:test && npm run pack:test && npm run init:stack:test",
     "update:test": "npm run yaml:test && npm run pack:test && npm run update:stack:test",
 
     "pack:test:w": "aws --region %npm_config_aws_test_region% cloudformation package --template-file build.yaml --s3-bucket %npm_config_aws_test_bucket% --output-template-file package.yaml",
-    "init:stack:test:w": "aws --region %npm_config_aws_test_region% cloudformation deploy --template-file package.yaml --stack-name %npm_config_aws_test_stack% --capabilities CAPABILITY_IAM --parameter-overrides DBUser=%npm_config_aws_test_dbuser% DBName=%npm_config_aws_test_dbname% DBPassword=%npm_config_aws_test_dbpassword%",
+    "init:stack:test:w": "aws --region %npm_config_aws_test_region% cloudformation deploy --template-file package.yaml --stack-name %npm_config_aws_test_stack% --capabilities CAPABILITY_IAM --parameter-overrides DBUser=%npm_config_aws_test_dbuser% DBName=%npm_config_aws_test_dbname% DBPassword=%npm_config_aws_test_dbpassword% DataS3BucketName=%npm_config_aws_test_databucket%",
     "update:stack:test:w": "aws --region %npm_config_aws_test_region% cloudformation deploy --template-file package.yaml --stack-name %npm_config_aws_test_stack% --capabilities CAPABILITY_IAM --parameter-overrides DeployVersion=%DATE%_%TIME%",
     "describe:test:w": "aws --region %npm_config_aws_test_region% cloudformation describe-stacks --stack-name %npm_config_aws_test_stack%",
     "init:test:w": "npm run yaml:test && npm run pack:test:w && npm run init:stack:test:w",

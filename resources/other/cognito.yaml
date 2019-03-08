@@ -13,3 +13,4 @@ Resources:
         - AttributeDataType: String
           Name: email
           Required: false
+  # pool id and key to env
