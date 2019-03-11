@@ -26,3 +26,8 @@ DeployVersion:
   NoEcho: true
   Description: 'timestamp to update customresources'
   Default: 'init'
+DataS3BucketName:
+  Type: String
+  Description: 'S3 bucket foe data saved by users'
+  Default: 'todoapp.smoogie.public.test'
+

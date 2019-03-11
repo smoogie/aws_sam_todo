@@ -1,0 +1,27 @@
+Resources:
+  # S3 for files
+  PublicDataS3:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Ref: DataS3BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+  PublicDataS3BucketPolicy:
+    DependsOn: PublicDataS3
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: PublicDataS3
+      PolicyDocument:
+        Statement:
+          -
+            Sid: GetPerm
+            Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource:
+              Fn::Sub: "${PublicDataS3.Arn}/*"

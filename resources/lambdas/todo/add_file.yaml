@@ -1,0 +1,44 @@
+Resources:
+  #IAM configuration
+  AddFileRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: addFilePolicy
+          PolicyDocument:
+            Statement:
+              - Sid: PutGetPerm
+                Effect: Allow
+                Action:
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                Resource:
+                  Fn::Sub: "${PublicDataS3.Arn}/*"
+  AddFileFunction:
+    Type: AWS::Serverless::Function
+    Name: 'add-file'
+    Properties:
+      Role:
+        Fn::Sub: '${AddFileRole.Arn}'
+      CodeUri: ./src
+      Handler: actions/todo/add_file.handler
+      Events:
+        SddFile:
+          Type: Api
+          Properties:
+            Path: /todo/{todoId}/file
+            Method: post
+            RestApiId:
+              Ref: ToDoApi

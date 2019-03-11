@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Todo serverless appplication",
   "dependencies": {
+    "aws-sdk": "^2.417.0",
+    "file-type": "^10.9.0",
     "mysql2": "^1.6.5"
   },
   "scripts": {},
