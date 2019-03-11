@@ -1,0 +1,6 @@
+Resources:
+  # SQS for mails
+  MialSQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: 'Todo-test-mail'

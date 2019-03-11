@@ -1,0 +1,61 @@
+paths:
+  /register:
+    post:
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 'A JSON with info about user'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+      parameters:
+        - in: body
+          name: email
+          schema:
+            type: string
+          required: true
+          description: 'user email'
+        - in: body
+          name: firstName
+          schema:
+            type: string
+          required: true
+          description: 'user first name'
+        - in: body
+          name: lastName
+          schema:
+            type: string
+          required: true
+          description: 'user last name'
+      x-amazon-apigateway-integration:
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RegisterUserFunction.Arn}/invocations
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws
+        requestTemplates:
+          "application/json": >
+            #set($allParams = $input.params())
+            {
+            "bodyJson" : $input.json('$'),
+            "params" : {
+            #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+            "$type" : {
+                #foreach($paramName in $params.keySet())
+                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                    #if($foreach.hasNext),#end
+                #end
+            }
+                #if($foreach.hasNext),#end
+            #end
+            },
+            "context" : {
+                "cognitoIdentityId" : "$context.identity.cognitoIdentityId",
+                "cognitoIdentityPoolId" : "$context.identity.cognitoIdentityPoolId"
+                }
+            }

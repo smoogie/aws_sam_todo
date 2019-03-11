@@ -1,0 +1,45 @@
+Resources:
+  #IAM configuration
+  RegisterUserRole:
+    DependsOn: MialSQS
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: addMailToSendPolicy
+          PolicyDocument:
+            Statement:
+              - Sid: SendMessagePerm
+                Effect: Allow
+                Action:
+                  - "sqs:SendMessage"
+                Resource:
+                  Fn::Sub: "${MialSQS.Arn}"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  RegisterUserFunction:
+    DependsOn: RegisterUserRole
+    Type: AWS::Serverless::Function
+    Name: 'register-user'
+    Properties:
+      Role:
+        Fn::Sub: '${RegisterUserRole.Arn}'
+      CodeUri: ./src
+      Handler: actions/users/register.handler
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /register
+            Method: post
+            RestApiId:
+              Ref: ToDoApi
