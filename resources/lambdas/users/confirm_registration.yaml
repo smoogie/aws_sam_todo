@@ -1,0 +1,33 @@
+Resources:
+  #IAM configuration
+  ConfirmUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  ConfirmUserFunction:
+    Type: AWS::Serverless::Function
+    Name: 'confirm-user'
+    Properties:
+      Role:
+        Fn::Sub: '${ConfirmUserRole.Arn}'
+      CodeUri: ./src
+      Handler: actions/users/confirm_registration.handler
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /confirm_registration
+            Method: get
+            RestApiId:
+              Ref: ToDoApi
