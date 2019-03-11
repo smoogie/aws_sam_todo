@@ -22,3 +22,5 @@ Function:
         Ref: DataS3BucketName
       DEPLOYMENT_REGION:
         Ref: AWS::Region
+      SQS_MAIL_URL:
+        Ref: MialSQS
