@@ -1,5 +1,4 @@
 Resources:
-  #IAM configuration
   ConfirmUserRole:
     Type: AWS::IAM::Role
     Properties:

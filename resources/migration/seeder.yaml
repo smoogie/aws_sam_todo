@@ -1,5 +1,4 @@
 Resources:
-  #IAM configuration
   SeederRole:
     DependsOn: ToDoDB
     Type: AWS::IAM::Role

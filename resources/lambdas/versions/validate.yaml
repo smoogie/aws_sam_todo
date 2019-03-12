@@ -1,5 +1,4 @@
 Resources:
-  #IAM configuration
   VersionValidationRole:
     Type: AWS::IAM::Role
     Properties:
