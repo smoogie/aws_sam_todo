@@ -2,7 +2,6 @@ Resources:
   S3ThumbnailRole:
     Type: AWS::IAM::Role
     Properties:
-      Timeout: 90
       RoleName:
         Fn::Sub: '${StageName}-s3-thumbnail-role'
       AssumeRolePolicyDocument:
@@ -23,6 +22,7 @@ Resources:
     Name:
       Fn::Sub: '${StageName}-s3-thumbnail'
     Properties:
+      Timeout: 90
       Role:
         Fn::Sub: '${S3ThumbnailRole.Arn}'
       CodeUri: ./src
