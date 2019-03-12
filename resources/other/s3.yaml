@@ -15,7 +15,7 @@ Resources:
         LambdaConfigurations:
           - Event: 's3:ObjectCreated:*'
             Function:
-              Ref: S3ThumbnailFunction
+              Fn::Sub: '${S3ThumbnailFunction.Arn}'
             Filter:
               S3Key:
                 Rules:
@@ -25,7 +25,7 @@ Resources:
                     Value: '.jpg'
           - Event: 's3:ObjectCreated:*'
             Function:
-              Ref: S3ThumbnailFunction
+              Fn::Sub: '${S3ThumbnailFunction.Arn}'
             Filter:
               S3Key:
                 Rules:
@@ -33,7 +33,20 @@ Resources:
                     Value: 'origin'
                   - Name: suffix
                     Value: '.png'
-
+  LambdaInvokePermission:
+    DependsOn:
+      - S3ThumbnailFunction
+      - PublicDataS3Bucket
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Fn::Sub: '${S3ThumbnailFunction.Arn}'
+      Action: 'lambda:InvokeFunction'
+      Principal: s3.amazonaws.com
+      SourceAccount:
+        Ref: 'AWS::AccountId'
+      SourceArn:
+        Fn::Sub: '${PublicDataS3Bucket.Arn}'
   PublicDataS3BucketPolicy:
     DependsOn: PublicDataS3Bucket
     Type: AWS::S3::BucketPolicy
