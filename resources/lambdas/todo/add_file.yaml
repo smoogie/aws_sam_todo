@@ -1,5 +1,4 @@
 Resources:
-  #IAM configuration
   AddFileRole:
     Type: AWS::IAM::Role
     Properties:

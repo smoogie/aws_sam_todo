@@ -1,5 +1,4 @@
 Resources:
-  #IAM configuration
   RegisterUserRole:
     DependsOn: MialSQS
     Type: AWS::IAM::Role

@@ -1,5 +1,4 @@
 Resources:
-  #IAM configuration
   MigrationRole:
     DependsOn:
       - ToDoDB
@@ -21,7 +20,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-  # Lambda Configuration
   MigrationFunction:
     DependsOn: MigrationRole
     Type: AWS::Serverless::Function
