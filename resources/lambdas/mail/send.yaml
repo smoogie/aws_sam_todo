@@ -1,5 +1,4 @@
 Resources:
-  #IAM configuration
   MailSenderRole:
     DependsOn: MialSQS
     Type: AWS::IAM::Role
