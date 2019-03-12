@@ -1,6 +1,7 @@
 Resources:
   # S3 for files
   PublicDataS3Bucket:
+    DependsOn: S3ThumbnailFunction
     Type: AWS::S3::Bucket
     Properties:
       BucketName:
