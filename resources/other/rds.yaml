@@ -7,6 +7,8 @@ Resources:
       - PrivateSubnet3RouteTableAssociation
     Type: AWS::RDS::DBSubnetGroup
     Properties:
+      DBSubnetGroupName:
+        Fn::Sub: '${StageName}-db-subnet'
       DBSubnetGroupDescription: 'DB subnet group'
       SubnetIds:
         - Ref: PrivateSubnet1

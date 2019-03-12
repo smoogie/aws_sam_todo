@@ -3,4 +3,5 @@ Resources:
   MialSQS:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: 'Todo-test-mail'
+      QueueName:
+        Fn::Sub: '${StageName}-todo-test-mail'

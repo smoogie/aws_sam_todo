@@ -1,0 +1,20 @@
+Resources:
+  PublicS3GetPutPolicy:
+    DependsOn:
+      - PublicDataS3
+      - AddFileRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Sub: '${StageName}-public-s3-get-put'
+      PolicyDocument:
+        Statement:
+          - Sid: PutGetPerm
+            Effect: Allow
+            Action:
+              - 's3:PutObject'
+              - 's3:GetObject'
+            Resource:
+              Fn::Sub: '${PublicDataS3.Arn}/*'
+      Roles:
+        - Ref: AddFileRole

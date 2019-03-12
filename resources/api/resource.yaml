@@ -6,8 +6,9 @@ Resources:
       - ToDoDB
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Released
-      Name: 'todo-app'
+      StageName: 'Released'
+      Name:
+        Fn::Sub: '${StageName}-todo-app'
       Auth:
         Authorizers:
           ToDoCognitoAuthorizer:

@@ -21,7 +21,7 @@ Resources:
           -
             Sid: GetPerm
             Effect: Allow
-            Principal: "*"
-            Action: "s3:GetObject"
+            Principal: '*'
+            Action: 's3:GetObject'
             Resource:
-              Fn::Sub: "${PublicDataS3.Arn}/*"
+              Fn::Sub: '${PublicDataS3.Arn}/*'

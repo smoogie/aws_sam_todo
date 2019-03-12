@@ -20,6 +20,7 @@ console.log(`main_merged.yaml was published`);
 const mergedTemplate = merger.merge([
     'tmp/main_merged.yaml',
     'resources/other/*.yaml',
+    'resources/policies/*.yaml',
     'resources/migration/*.yaml',
     'resources/lambdas/*/*.yaml',
     'tmp/api_resource.yaml'

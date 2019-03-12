@@ -1,18 +1,23 @@
 Resources:
   #IAM configuration
   MigrationRole:
-    DependsOn: ToDoDB
+    DependsOn:
+      - ToDoDB
+      - RouteToInternetGateway
+      - RouteToNAT
     Type: AWS::IAM::Role
     Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-migration-role'
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: "Allow"
+          - Effect: Allow
             Principal:
               Service:
                 - lambda.amazonaws.com
-            Action: "sts:AssumeRole"
-      Path: "/"
+            Action: 'sts:AssumeRole'
+      Path: '/'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
@@ -20,7 +25,8 @@ Resources:
   MigrationFunction:
     DependsOn: MigrationRole
     Type: AWS::Serverless::Function
-    Name: 'migrations'
+    Name:
+      Fn::Sub: '${StageName}-migrations'
     Properties:
       Timeout: 60
       Role:

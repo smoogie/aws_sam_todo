@@ -4,32 +4,25 @@ Resources:
     DependsOn: MialSQS
     Type: AWS::IAM::Role
     Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-register-user-role'
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: "Allow"
+          - Effect: Allow
             Principal:
               Service:
                 - lambda.amazonaws.com
-            Action: "sts:AssumeRole"
-      Path: "/"
-      Policies:
-        - PolicyName: addMailToSendPolicy
-          PolicyDocument:
-            Statement:
-              - Sid: SendMessagePerm
-                Effect: Allow
-                Action:
-                  - "sqs:SendMessage"
-                Resource:
-                  Fn::Sub: "${MialSQS.Arn}"
+            Action: 'sts:AssumeRole'
+      Path: '/'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
   RegisterUserFunction:
     DependsOn: RegisterUserRole
     Type: AWS::Serverless::Function
-    Name: 'register-user'
+    Name:
+      Fn::Sub: '${StageName}-register-user'
     Properties:
       Role:
         Fn::Sub: '${RegisterUserRole.Arn}'
