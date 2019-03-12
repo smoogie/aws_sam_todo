@@ -7,6 +7,8 @@ Resources:
       - PrivateSubnet3RouteTableAssociation
     Type: AWS::EC2::SecurityGroup
     Properties:
+      GroupName:
+        Fn::Sub: '${StageName}-lambda-security-group'
       GroupDescription: 'Lambda security group'
       VpcId:
         Ref: MainVPC
@@ -14,6 +16,8 @@ Resources:
     DependsOn: LambdaSecurityGroup
     Type: AWS::EC2::SecurityGroup
     Properties:
+      GroupName:
+        Fn::Sub: '${StageName}-rds-security-group'
       GroupDescription: 'RDS security group'
       VpcId:
         Ref: MainVPC

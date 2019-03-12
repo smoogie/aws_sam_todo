@@ -1,23 +1,25 @@
 Resources:
-  #IAM configuration
   GetUserRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-get-user-role'
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: "Allow"
+          - Effect: Allow
             Principal:
               Service:
                 - lambda.amazonaws.com
-            Action: "sts:AssumeRole"
-      Path: "/"
+            Action: 'sts:AssumeRole'
+      Path: '/'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
   GetUserFunction:
     Type: AWS::Serverless::Function
-    Name: 'get-user'
+    Name:
+      Fn::Sub: '${StageName}-get-user'
     Properties:
       Role:
         Fn::Sub: '${GetUserRole.Arn}'

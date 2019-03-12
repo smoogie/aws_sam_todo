@@ -11,26 +11,26 @@ paths:
               type: string
       parameters:
         - in: body
-          name: email
+          name: 'email'
           schema:
             type: string
           required: true
           description: 'user email'
         - in: body
-          name: firstName
+          name: 'firstName'
           schema:
             type: string
           required: true
           description: 'user first name'
         - in: body
-          name: lastName
+          name: 'lastName'
           schema:
             type: string
           required: true
           description: 'user last name'
       x-amazon-apigateway-integration:
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RegisterUserFunction.Arn}/invocations
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RegisterUserFunction.Arn}/invocations'
         responses:
           default:
             statusCode: 200
@@ -38,7 +38,7 @@ paths:
         httpMethod: POST
         type: aws
         requestTemplates:
-          "application/json": >
+          application/json: >
             #set($allParams = $input.params())
             {
             "bodyJson" : $input.json('$'),

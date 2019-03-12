@@ -1,9 +1,9 @@
 Resources:
-  ConfirmUserRole:
+  S3ThumbnailRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName:
-        Fn::Sub: '${StageName}-confirm-user-role'
+        Fn::Sub: '${StageName}-s3-thumbnail-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -16,20 +16,14 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-  ConfirmUserFunction:
+  S3ThumbnailFunction:
+    DependsOn: S3ThumbnailRole
     Type: AWS::Serverless::Function
     Name:
-      Fn::Sub: '${StageName}-confirm-user'
+      Fn::Sub: '${StageName}-s3-thumbnail'
     Properties:
+      Timeout: 90
       Role:
-        Fn::Sub: '${ConfirmUserRole.Arn}'
+        Fn::Sub: '${S3ThumbnailRole.Arn}'
       CodeUri: ./src
-      Handler: actions/users/confirm_registration.handler
-      Events:
-        GetUser:
-          Type: Api
-          Properties:
-            Path: /confirm_registration
-            Method: get
-            RestApiId:
-              Ref: ToDoApi
+      Handler: actions/s3/thumbnail.handler

@@ -1,18 +1,19 @@
 Resources:
-  #IAM configuration
   SeederRole:
     DependsOn: ToDoDB
     Type: AWS::IAM::Role
     Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-seeder-role'
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: "Allow"
+          - Effect: Allow
             Principal:
               Service:
                 - lambda.amazonaws.com
-            Action: "sts:AssumeRole"
-      Path: "/"
+            Action: 'sts:AssumeRole'
+      Path: '/'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
@@ -21,7 +22,8 @@ Resources:
       - SeederRole
       - MigrationFunction
     Type: AWS::Serverless::Function
-    Name: 'seeder'
+    Name:
+      Fn::Sub: '${StageName}-seeder'
     Properties:
       Timeout: 60
       Role:

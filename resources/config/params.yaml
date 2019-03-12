@@ -30,4 +30,8 @@ DataS3BucketName:
   Type: String
   Description: 'S3 bucket foe data saved by users'
   Default: 'todoapp.smoogie.public.test'
+StageName:
+  Type: String
+  Description: 'Application stage to deploy e.g. dev, test, production'
+  Default: 'dev'
 

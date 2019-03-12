@@ -1,0 +1,19 @@
+Resources:
+  PublicSQSSendPolicy:
+    DependsOn:
+      - MialSQS
+      - RegisterUserRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Sub: '${StageName}-mail-sqs-send'
+      PolicyDocument:
+        Statement:
+          - Sid: SendMessagePerm
+            Effect: Allow
+            Action:
+              - 'sqs:SendMessage'
+            Resource:
+              Fn::Sub: '${MialSQS.Arn}'
+      Roles:
+        - Ref: RegisterUserRole

@@ -1,8 +1,9 @@
 */node_modules
 /node_modules
-.idea
-.npmrc
-package.yaml
-build.yaml
-locals
 tmp
+.npmrc
+production.yaml
+build.yaml
+dev.yaml
+test.yaml
+.idea

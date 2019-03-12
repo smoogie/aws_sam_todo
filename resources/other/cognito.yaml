@@ -3,7 +3,8 @@ Resources:
   ToDoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: ToDoUserPool
+      UserPoolName:
+        Fn::Sub: '${StageName}-todo-userpool'
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -11,6 +12,6 @@ Resources:
         - email
       Schema:
         - AttributeDataType: String
-          Name: email
+          Name: 'email'
           Required: false
   # pool id and key to env

@@ -11,7 +11,7 @@ Function:
     Variables:
       # TODO: add cognito access
       DB_HOST:
-        Fn::GetAtt: ToDoDB.Endpoint.Address
+        Fn::Sub: '${ToDoDB.Endpoint.Address}'
       DB_USER:
         Ref: DBUser
       DB_PASSWORD:
@@ -24,3 +24,5 @@ Function:
         Ref: AWS::Region
       SQS_MAIL_URL:
         Ref: MialSQS
+      STAGE:
+        Ref: StageName

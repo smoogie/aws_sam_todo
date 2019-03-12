@@ -28,15 +28,18 @@ Resources:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId:
-        Fn::GetAtt:
-          - EIP
-          - AllocationId
+        Fn::Sub: '${EIP.AllocationId}'
       SubnetId:
         Ref: PublicSubnet1
   # Route Subnet association
   RouteToInternetGateway:
     DependsOn:
-      - PublicRouteTable
+      - PublicSubnet1RouteTableAssociation
+      - PublicSubnet2RouteTableAssociation
+      - PublicSubnet3RouteTableAssociation
+      - PrivateSubnet1RouteTableAssociation
+      - PrivateSubnet2RouteTableAssociation
+      - PrivateSubnet3RouteTableAssociation
       - AttachInternetGateway
     Type: AWS::EC2::Route
     Properties:
