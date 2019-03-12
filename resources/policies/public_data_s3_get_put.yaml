@@ -1,8 +1,9 @@
 Resources:
   PublicS3GetPutPolicy:
     DependsOn:
-      - PublicDataS3
+      - PublicDataS3Bucket
       - AddFileRole
+      - S3ThumbnailRole
     Type: AWS::IAM::Policy
     Properties:
       PolicyName:
@@ -15,6 +16,7 @@ Resources:
               - 's3:PutObject'
               - 's3:GetObject'
             Resource:
-              Fn::Sub: '${PublicDataS3.Arn}/*'
+              Fn::Sub: '${PublicDataS3Bucket.Arn}/*'
       Roles:
         - Ref: AddFileRole
+        - Ref: S3ThumbnailRole

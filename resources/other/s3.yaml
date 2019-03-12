@@ -1,6 +1,6 @@
 Resources:
   # S3 for files
-  PublicDataS3:
+  PublicDataS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName:
@@ -10,12 +10,35 @@ Resources:
         BlockPublicPolicy: false
         IgnorePublicAcls: false
         RestrictPublicBuckets: false
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Function:
+              Ref: S3ThumbnailFunction
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: 'origin'
+                  - Name: suffix
+                    Value: '.jpg'
+          - Event: 's3:ObjectCreated:*'
+            Function:
+              Ref: S3ThumbnailFunction
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: 'origin'
+                  - Name: suffix
+                    Value: '.png'
+
   PublicDataS3BucketPolicy:
-    DependsOn: PublicDataS3
+    DependsOn: PublicDataS3Bucket
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket:
-        Ref: PublicDataS3
+        Ref: PublicDataS3Bucket
       PolicyDocument:
         Statement:
           -
@@ -24,4 +47,4 @@ Resources:
             Principal: '*'
             Action: 's3:GetObject'
             Resource:
-              Fn::Sub: '${PublicDataS3.Arn}/*'
+              Fn::Sub: '${PublicDataS3Bucket.Arn}/*'
