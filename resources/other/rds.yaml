@@ -26,7 +26,7 @@ Resources:
       DBInstanceClass: db.t2.micro
       Engine: MySQL
       EngineVersion: 5.7.23
-      PubliclyAccessible: true
+      PubliclyAccessible: false
       DBName:
         Ref: DBName
       MasterUsername:
