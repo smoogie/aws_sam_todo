@@ -5,13 +5,39 @@ Resources:
     Properties:
       UserPoolName:
         Fn::Sub: '${StageName}-todo-userpool'
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+        UnusedAccountValidityDays: 14
+      AutoVerifiedAttributes:
+        - email
       Policies:
         PasswordPolicy:
           MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          RequireUppercase: true
       UsernameAttributes:
         - email
       Schema:
         - AttributeDataType: String
           Name: 'email'
           Required: false
-  # pool id and key to env
+  ToDoUserPoolClientLambda:
+    DependsOn: ToDoUserPool
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName:
+        Fn::Sub: '${StageName}-todo-userclient-lambda'
+      RefreshTokenValidity: 30
+      UserPoolId:
+        Ref: ToDoUserPool
+  ToDoUserPoolClientMobile:
+    DependsOn: ToDoUserPool
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName:
+        Fn::Sub: '${StageName}-todo-userclient-mobile'
+      RefreshTokenValidity: 30
+      UserPoolId:
+        Ref: ToDoUserPool

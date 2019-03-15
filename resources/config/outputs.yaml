@@ -7,3 +7,6 @@ DB:
 PublicS3:
   Value:
     Fn::Sub: 'https://s3.${AWS::Region}.amazonaws.com/${PublicDataS3Bucket}'
+MobileClient:
+  Value:
+    Ref: ToDoUserPoolClientMobile

@@ -26,3 +26,7 @@ Function:
         Ref: MialSQS
       STAGE:
         Ref: StageName
+      USER_POOL:
+        Ref: ToDoUserPool
+      USER_POOL_CLIENT:
+        Ref: ToDoUserPoolClientLambda
