@@ -2,35 +2,37 @@ const Sequelize = require('sequelize');
 
 module.exports = {
   up(queryInterface, DataTypes) {
-    return queryInterface.createTable('users', {
+    return queryInterface.createTable('access_tokens', {
       id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
       },
-      email: {
-        type: DataTypes.TEXT,
-        allowNull: false
+      token: {
+        type: DataTypes.STRING(600),
+        allowNull: false,
+        unique: true
       },
-      firstName: {
-        type: DataTypes.TEXT,
-        allowNull: true
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        reference: {
+          model: 'users',
+          key: 'id'
+        }
       },
-      lastName: {
-        type: DataTypes.TEXT,
-        allowNull: true
-      },
-      cognito_id: {
-        type: DataTypes.TEXT,
-        allowNull: true
+      refreshToken: {
+        type: DataTypes.STRING(600),
+        allowNull: false,
+        unique: true
       },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW
       },
-      updatedAt: {
+      validateDate: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW
@@ -39,6 +41,6 @@ module.exports = {
   },
 
   down(queryInterface, DataTypes) {
-    return queryInterface.dropTable('users');
+    return queryInterface.dropTable('access_tokens');
   }
 };

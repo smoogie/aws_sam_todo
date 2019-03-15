@@ -2,7 +2,7 @@ Resources:
   # Api gateway definition with swagger
   ToDoApi:
     DependsOn:
-      - ToDoUserPool
+      - AuthorizationFunction
       - ToDoDB
     Type: AWS::Serverless::Api
     Properties:
@@ -10,9 +10,11 @@ Resources:
       Name:
         Fn::Sub: '${StageName}-todo-app'
       Auth:
+        DefaultAuthorizer: ToDoLambdaAuthorizer
         Authorizers:
-          ToDoCognitoAuthorizer:
-            UserPoolArn:
-              Fn::Sub: '${ToDoUserPool.Arn}'
+          ToDoLambdaAuthorizer:
+            FunctionPayloadType: TOKEN
+            FunctionArn:
+              Fn::Sub: '${AuthorizationFunction.Arn}'
       DefinitionBody:
         $include: ./api.yaml

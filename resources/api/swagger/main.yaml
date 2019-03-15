@@ -4,11 +4,16 @@ info:
   title: 'Todo API'
 # cognito authorizer
 securityDefinitions:
-  ToDoCognitoAuthorizer:
+  ToDoLambdaAuthorizer:
     type: apiKey
     name: 'Authorization'
     in: header
-    x-amazon-apigateway-authtype: cognito_user_pools
+    x-amazon-apigateway-authtype: custom
+    x-amazon-apigateway-authorizer:
+      authorizerUri:
+        Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizationFunction.Arn}/invocations'
+      authorizerResultTtlInSeconds: 300
+      type: token
 definitions:
   ErrorResponse:
     title: 'version response error'

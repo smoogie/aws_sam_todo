@@ -9,9 +9,18 @@ module.exports = {
         defaultValue: 1
       });
       await queryInterface.addColumn('users', 'confirm_token', {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING(255),
         allowNull: true
       });
+      await queryInterface.addColumn('users', 'password', {
+        type: DataTypes.STRING(255),
+        allowNull: true
+      });
+      await queryInterface.addColumn('users', 'new_email', {
+        type: DataTypes.STRING(500),
+        allowNull: true
+      });
+      await queryInterface.removeColumn('users', 'cognito_id');
       return Promise.resolve();
     } catch (error) {
       return Promise.reject(error);
@@ -21,6 +30,12 @@ module.exports = {
     try {
       await queryInterface.removeColumn('users', 'status');
       await queryInterface.removeColumn('users', 'confirm_token');
+      await queryInterface.removeColumn('users', 'password');
+      await queryInterface.removeColumn('users', 'new_email');
+      await queryInterface.addColumn('users', 'cognito_id', {
+        type: DataTypes.TEXT,
+        allowNull: true
+      });
       return Promise.resolve();
     } catch (error) {
       return Promise.reject(error);

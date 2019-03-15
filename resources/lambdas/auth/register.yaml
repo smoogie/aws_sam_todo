@@ -26,12 +26,12 @@ Resources:
       Role:
         Fn::Sub: '${RegisterUserRole.Arn}'
       CodeUri: ./src
-      Handler: actions/users/register.handler
+      Handler: actions/auth/register.handler
       Events:
         GetUser:
           Type: Api
           Properties:
-            Path: /register
+            Path: /auth/register
             Method: post
             RestApiId:
               Ref: ToDoApi
