@@ -1,0 +1,35 @@
+Resources:
+  EditUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-edit-user-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  EditUserFunction:
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-edit-user'
+    Properties:
+      Role:
+        Fn::Sub: '${EditUserRole.Arn}'
+      CodeUri: ./src
+      Handler: actions/users/edit.handler
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: put
+            RestApiId:
+              Ref: ToDoApi

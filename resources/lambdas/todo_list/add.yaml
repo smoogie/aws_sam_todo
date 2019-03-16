@@ -1,0 +1,35 @@
+Resources:
+  AddToDoListRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-add-todo-list-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  AddToDoListFunction:
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-add-todo-list'
+    Properties:
+      Role:
+        Fn::Sub: '${AddToDoListRole.Arn}'
+      CodeUri: ./src
+      Handler: actions/todo_list/add.handler
+      Events:
+        SddFile:
+          Type: Api
+          Properties:
+            Path: /todo_list
+            Method: post
+            RestApiId:
+              Ref: ToDoApi

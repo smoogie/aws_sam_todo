@@ -26,3 +26,5 @@ Function:
         Ref: MialSQS
       STAGE:
         Ref: StageName
+      SALT:
+        Ref: PassSalt

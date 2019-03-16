@@ -1,14 +1,5 @@
-definitions:
-  FileInfoResponse:
-    title: 'file info response'
-    type: object
-    required:
-      - url
-    properties:
-      accepted:
-        type: string
 paths:
-  /todo/{todoId}/file:
+  /todo_list:
     post:
       security:
         - ToDoLambdaAuthorizer: []
@@ -16,27 +7,20 @@ paths:
         - application/json
       responses:
         '200':
-          description: 'A JSON with info about added file'
+          description: 'A JSON with info about added list'
           headers:
             Access-Control-Allow-Origin:
               type: string
           content:
             application/json:
               schema:
-                $ref: '#/definitions/FileInfoResponse'
-      parameters:
-        - in: path
-          name: 'todoId'
-          schema:
-            type: string
-          required: true
-          description: 'todo list id'
-      summary: 'save file for todo'
+                $ref: '#/definitions/ToDoListResponse'
+      summary: 'add todo list'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: aws
         uri:
-          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddFileFunction.Arn}/invocations'
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddToDoListFunction.Arn}/invocations'
         responses:
           default:
             statusCode: 200
