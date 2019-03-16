@@ -1,9 +1,9 @@
 Resources:
-  ConfirmUserRole:
+  LoginRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName:
-        Fn::Sub: '${StageName}-confirm-user-role'
+        Fn::Sub: '${StageName}-login-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -16,20 +16,21 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-  ConfirmUserFunction:
+  LoginFunction:
+    DependsOn: LoginRole
     Type: AWS::Serverless::Function
     Name:
-      Fn::Sub: '${StageName}-confirm-user'
+      Fn::Sub: '${StageName}-login'
     Properties:
       Role:
-        Fn::Sub: '${ConfirmUserRole.Arn}'
+        Fn::Sub: '${LoginRole.Arn}'
       CodeUri: ./src
-      Handler: actions/users/confirm_registration.handler
+      Handler: actions/auth/login.handler
       Events:
         GetUser:
           Type: Api
           Properties:
-            Path: /confirm_registration
-            Method: get
+            Path: /auth/login
+            Method: post
             RestApiId:
               Ref: ToDoApi

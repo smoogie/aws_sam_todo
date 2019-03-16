@@ -1,0 +1,65 @@
+paths:
+  /auth/verify:
+    get:
+      produces:
+        - text/html
+      responses:
+        '200':
+          description: 'A JSON with info about user'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Content-Type:
+              type: string
+      x-amazon-apigateway-integration:
+        uri:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VerifyAccountFunction.Arn}/invocations'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Content-Type: 'integration.response.body.headers.ContentType'
+            responseTemplates:
+              text/html: "$input.path('$.body')"
+          404:
+            statusCode: 404
+            responseParameters:
+              method.response.header.Content-Type: 'integration.response.body.headers.ContentType'
+            responseTemplates:
+              text/html: "$input.path('$.body')"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws
+        requestTemplates:
+          text/html: >
+            #set($allParams = $input.params())
+            {
+            "params" : {
+            #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+            "$type" : {
+                #foreach($paramName in $params.keySet())
+                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                    #if($foreach.hasNext),#end
+                #end
+            }
+                #if($foreach.hasNext),#end
+            #end
+            }
+            }
+          application/json: >
+            #set($allParams = $input.params())
+            {
+            "params" : {
+            #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+            "$type" : {
+                #foreach($paramName in $params.keySet())
+                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                    #if($foreach.hasNext),#end
+                #end
+            }
+                #if($foreach.hasNext),#end
+            #end
+            }
+            }

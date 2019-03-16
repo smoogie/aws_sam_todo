@@ -2,27 +2,35 @@ const Sequelize = require('sequelize');
 
 module.exports = {
   up(queryInterface, DataTypes) {
-    return queryInterface.createTable('users', {
+    return queryInterface.createTable('todo_files', {
       id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
       },
-      email: {
-        type: DataTypes.TEXT,
+      itemId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        reference: {
+          model: 'todo_items',
+          key: 'id'
+        }
+      },
+      bucket: {
+        type: DataTypes.STRING(500),
         allowNull: false
       },
-      firstName: {
-        type: DataTypes.TEXT,
-        allowNull: true
+      region: {
+        type: DataTypes.STRING(500),
+        allowNull: false
       },
-      lastName: {
-        type: DataTypes.TEXT,
-        allowNull: true
+      path_origin: {
+        type: DataTypes.STRING(500),
+        allowNull: false
       },
-      cognito_id: {
-        type: DataTypes.TEXT,
+      path_minimize: {
+        type: DataTypes.STRING(500),
         allowNull: true
       },
       createdAt: {
@@ -39,6 +47,6 @@ module.exports = {
   },
 
   down(queryInterface, DataTypes) {
-    return queryInterface.dropTable('users');
+    return queryInterface.dropTable('todo_files');
   }
 };

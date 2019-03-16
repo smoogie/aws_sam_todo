@@ -1,19 +1,46 @@
+definitions:
+  LoginResponse:
+    title: 'login response'
+    type: object
+    required:
+      - access_token
+      - refresh_token
+      - token_validity
+    properties:
+      accepted:
+        type: bool
 paths:
-  /user:
-    get:
-      security:
-        - ToDoLambdaAuthorizer: []
+  /auth/login:
+    post:
       produces:
         - application/json
       responses:
         '200':
-          description: 'A JSON with info about user'
+          description: 'A JSON with tokens'
           headers:
             Access-Control-Allow-Origin:
               type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/LoginResponse'
+      parameters:
+        - in: body
+          name: 'user_credentials'
+          schema:
+            type: object
+            required:
+              - userName
+              - password
+            properties:
+              userName:
+                type: string
+              password:
+                type: string
+      summary: 'login'
       x-amazon-apigateway-integration:
         uri:
-          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUserFunction.Arn}/invocations'
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginFunction.Arn}/invocations'
         responses:
           default:
             statusCode: 200
@@ -36,7 +63,8 @@ paths:
             #end
             },
             "context" : {
-                      "userId" : "$context.authorizer.principalId"
+                "cognitoIdentityId" : "$context.identity.cognitoIdentityId",
+                "cognitoIdentityPoolId" : "$context.identity.cognitoIdentityPoolId"
                 }
             }
         httpMethod: POST
