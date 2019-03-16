@@ -16,9 +16,9 @@ function authResponse(principalId, methodArn, allowed = false) {
 
 function getUserId(token) {
   let id = null;
-  // if (token) {
-  //   id = 1;
-  // }
+  if (token) {
+    id = "11223";
+  }
   return id;
 }
 
@@ -31,7 +31,8 @@ exports.handler = async (event, context) => {
     }
     const principalId = getUserId(authorizationToken);
     const allowed = principalId !== null;
-    return authResponse(principalId, methodArn, allowed);
+    const policy = authResponse(principalId, methodArn, allowed);
+    return policy;
   } catch (error) {
     console.log(error);
     context.fail('Internal Server Error');

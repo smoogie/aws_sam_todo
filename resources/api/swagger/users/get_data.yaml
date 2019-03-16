@@ -36,7 +36,7 @@ paths:
             #end
             },
             "context" : {
-                      "userId" : "$context.authorizer.principalId",
+                      "userId" : "$context.authorizer.principalId"
                 }
             }
         httpMethod: POST
