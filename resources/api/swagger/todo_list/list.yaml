@@ -1,0 +1,31 @@
+paths:
+  /todo_list:
+    get:
+      security:
+        - ToDoLambdaAuthorizer: []
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 'A JSON with list of todo lists'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+      summary: 'get list of todo lists'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: aws
+        uri:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListToDoListFunction.Arn}/invocations'
+        responses:
+          default:
+            statusCode: 200
+        passthroughBehavior: when_no_templates
+        requestTemplates:
+          application/json: >
+            #set($allParams = $input.params())
+            {
+            "context" : {
+                      "userId" : "$context.authorizer.principalId"
+                }
+            }

@@ -15,6 +15,46 @@ securityDefinitions:
       authorizerResultTtlInSeconds: 300
       type: token
 definitions:
+  UserResponse:
+    title: 'user response'
+    type: object
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      status:
+        type: string
+  ToDoListResponse:
+    title: 'user response'
+    type: object
+    properties:
+      userId:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      items:
+        type: object
+  ToDoResponse:
+    title: 'user response'
+    type: object
+    properties:
+      id:
+        type: string
+      listId:
+        type: string
+      description:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      files:
+        type: object
   ErrorResponse:
     title: 'version response error'
     type: object

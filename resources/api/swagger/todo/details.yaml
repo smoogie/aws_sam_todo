@@ -1,42 +1,33 @@
-definitions:
-  FileInfoResponse:
-    title: 'file info response'
-    type: object
-    required:
-      - url
-    properties:
-      accepted:
-        type: string
 paths:
-  /todo/{todoId}/file:
-    post:
+  /todo/{todoId}:
+    get:
       security:
         - ToDoLambdaAuthorizer: []
       produces:
         - application/json
       responses:
         '200':
-          description: 'A JSON with info about added file'
+          description: 'A JSON with info about todo'
           headers:
             Access-Control-Allow-Origin:
               type: string
           content:
             application/json:
               schema:
-                $ref: '#/definitions/FileInfoResponse'
+                $ref: '#/definitions/ToDoResponse'
       parameters:
         - in: path
           name: 'todoId'
           schema:
             type: string
           required: true
-          description: 'todo list id'
-      summary: 'save file for todo'
+          description: 'todo id'
+      summary: 'get item from todo list'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: aws
         uri:
-          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddFileFunction.Arn}/invocations'
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DetailsToDoFunction.Arn}/invocations'
         responses:
           default:
             statusCode: 200
@@ -45,7 +36,6 @@ paths:
           application/json: >
             #set($allParams = $input.params())
             {
-            "bodyJson" : $input.json('$'),
             "params" : {
             #foreach($type in $allParams.keySet())
                 #set($params = $allParams.get($type))

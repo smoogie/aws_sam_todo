@@ -1,51 +1,57 @@
-definitions:
-  FileInfoResponse:
-    title: 'file info response'
-    type: object
-    required:
-      - url
-    properties:
-      accepted:
-        type: string
 paths:
-  /todo/{todoId}/file:
-    post:
+  /todo_list/{listId}:
+    get:
       security:
         - ToDoLambdaAuthorizer: []
       produces:
         - application/json
       responses:
-        '200':
-          description: 'A JSON with info about added file'
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+        200:
+          description: 'A JSON with info about todo list'
           headers:
             Access-Control-Allow-Origin:
               type: string
           content:
             application/json:
               schema:
-                $ref: '#/definitions/FileInfoResponse'
+                $ref: '#/definitions/ToDoListResponse'
       parameters:
         - in: path
-          name: 'todoId'
+          name: 'listId'
           schema:
             type: string
           required: true
           description: 'todo list id'
-      summary: 'save file for todo'
+      summary: 'get details of todo list'
       x-amazon-apigateway-integration:
         httpMethod: POST
         type: aws
         uri:
-          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddFileFunction.Arn}/invocations'
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ToDoListFunction.Arn}/invocations'
         responses:
+          .*"statusCode":404.*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n\
+                        {\n   \"error\" : $errorMessageObj.error\n}\n"
+          .*"statusCode":403.*:
+            statusCode: "403"
+            responseTemplates:
+              application/json: "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n\
+                        {\n   \"error\" : $errorMessageObj.error\n}\n"
           default:
-            statusCode: 200
+            statusCode: "200"
+            responseTemplates:
+              application/json: "$input.path('$.body')"
         passthroughBehavior: when_no_templates
         requestTemplates:
           application/json: >
             #set($allParams = $input.params())
             {
-            "bodyJson" : $input.json('$'),
             "params" : {
             #foreach($type in $allParams.keySet())
                 #set($params = $allParams.get($type))

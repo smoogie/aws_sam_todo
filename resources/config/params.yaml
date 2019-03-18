@@ -34,4 +34,8 @@ StageName:
   Type: String
   Description: 'Application stage to deploy e.g. dev, test, production'
   Default: 'dev'
+PassSalt:
+  Type: String
+  Description: 'Sald for password'
+  Default: 'WQDI5MS2OS4DJAQ1RWZL'
 
