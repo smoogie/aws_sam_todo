@@ -6,7 +6,11 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+        200:
           description: 'A JSON with info about todo list'
           headers:
             Access-Control-Allow-Origin:
@@ -29,8 +33,20 @@ paths:
         uri:
           Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ToDoListFunction.Arn}/invocations'
         responses:
+          .*"statusCode":404.*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n\
+                        {\n   \"error\" : $errorMessageObj.error\n}\n"
+          .*"statusCode":403.*:
+            statusCode: "403"
+            responseTemplates:
+              application/json: "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n\
+                        {\n   \"error\" : $errorMessageObj.error\n}\n"
           default:
-            statusCode: 200
+            statusCode: "200"
+            responseTemplates:
+              application/json: "$input.path('$.body')"
         passthroughBehavior: when_no_templates
         requestTemplates:
           application/json: >
