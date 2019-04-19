@@ -35,7 +35,7 @@ exports.send = (event, context, status, data) => {
     console.log('request created');
     req.on('error', (err) => {
       console.log(`Error on handling confirmation to CF: ${err}`);
-      reject(reject(context.done(error)));
+      reject(context.done(err));
     });
     console.log('on error ready');
     req.write(responseBody);
