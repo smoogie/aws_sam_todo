@@ -1,0 +1,43 @@
+Resources:
+  VerifyEmailRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-verify-email-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  VerifyEmailFunction:
+    DependsOn: VerifyEmailRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-verify-email'
+    Properties:
+      Role:
+        Fn::Sub: '${VerifyEmailRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/auth/verifyEmail.handler
+      Layers:
+        - Ref: MainDependenciesLayer
+      Events:
+        ApiAction:
+          Type: Api
+          Properties:
+            Path: /verify-email
+            Method: get
+            RestApiId:
+              Ref: AuthApi
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

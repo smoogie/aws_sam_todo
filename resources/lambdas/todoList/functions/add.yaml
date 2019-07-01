@@ -1,0 +1,43 @@
+Resources:
+  AddTodoListRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-add-todo-list-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  AddTodoListFunction:
+    DependsOn: AddTodoListRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-add-todo-list'
+    Properties:
+      Role:
+        Fn::Sub: '${AddTodoListRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/todoList/add.handler
+      Layers:
+        - Ref: MainDependenciesLayer
+      Events:
+        ApiAction:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+            RestApiId:
+              Ref: ToDoListApi
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

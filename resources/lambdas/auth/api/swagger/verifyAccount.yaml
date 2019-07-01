@@ -1,0 +1,113 @@
+paths:
+  /verify-account:
+    get:
+      produces:
+        - text/html
+      responses:
+        '500':
+          description: 'Response with page verification failed'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Content-Type:
+              type: string
+          content:
+            text/html
+        '422':
+          description: 'Error response'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: 'Response with page verification failed'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Content-Type:
+              type: string
+          content:
+            text/html
+        '200':
+          description: 'Response with page verification success'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Content-Type:
+              type: string
+          content:
+            text/html
+      parameters:
+        - in: query
+          name: 'token'
+          required: true
+          type: string
+        - in: query
+          name: 'lang'
+          required: true
+          type: string
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: aws
+        uri:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${VerifyAccountFunction.Arn}/invocations'
+        responses:
+          .*"statusCode":500.*:
+            statusCode: '500'
+            responseParameters:
+              method.response.header.Content-Type: 'integration.response.body.headers.ContentType'
+            responseTemplates:
+              text/html: "$input.path('$.body')"
+          .*"statusCode":422.*:
+            statusCode: '422'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          .*"statusCode":404.*:
+            statusCode: '404'
+            responseParameters:
+              method.response.header.Content-Type: 'integration.response.body.headers.ContentType'
+            responseTemplates:
+              text/html: "$input.path('$.body')"
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Content-Type: 'integration.response.body.headers.ContentType'
+            responseTemplates:
+              text/html: "$input.path('$.body')"
+        passthroughBehavior: when_no_match
+        requestTemplates:
+          text/html: >
+            #set($allParams = $input.params())
+            {
+            "params" : {
+            #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+            "$type" : {
+                #foreach($paramName in $params.keySet())
+                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                    #if($foreach.hasNext),#end
+                #end
+            }
+                #if($foreach.hasNext),#end
+            #end
+            }
+            }
+          application/json: >
+            #set($allParams = $input.params())
+            {
+            "params" : {
+            #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+            "$type" : {
+                #foreach($paramName in $params.keySet())
+                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                    #if($foreach.hasNext),#end
+                #end
+            }
+                #if($foreach.hasNext),#end
+            #end
+            }
+            }

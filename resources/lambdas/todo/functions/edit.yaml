@@ -1,0 +1,43 @@
+Resources:
+  EditTodoRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-edit-todo-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  EditTodoFunction:
+    DependsOn: EditTodoRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-edit-todo'
+    Properties:
+      Role:
+        Fn::Sub: '${EditTodoRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/todo/edit.handler
+      Layers:
+        - Ref: MainDependenciesLayer
+      Events:
+        ApiAction:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: put
+            RestApiId:
+              Ref: ToDoApi
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

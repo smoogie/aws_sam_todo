@@ -28,14 +28,37 @@ DeployVersion:
   Default: 'init'
 DataS3BucketName:
   Type: String
-  Description: 'S3 bucket foe data saved by users'
-  Default: 'todoapp.smoogie.public.test'
+  Description: 'S3 bucket for data saved by users'
 StageName:
   Type: String
   Description: 'Application stage to deploy e.g. dev, test, production'
   Default: 'dev'
 PassSalt:
   Type: String
+  NoEcho: true
   Description: 'Sald for password'
   Default: 'WQDI5MS2OS4DJAQ1RWZL'
-
+DBProxyKeyPair:
+  Type: String
+  Description: 'name of pair key in EC2 KeyPair service'
+  Default: 'todo-db-proxy-pair'
+MailFromEmail:
+  Type: String
+  Description: 'App mail address (use in mails options)'
+  AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+  ConstraintDescription: 'Must be a valid email address'
+MailFromName:
+  Type: String
+  Description: 'App mail name (use in mails options)'
+  Default: 'ToDo Example app'
+SendGridKey:
+  Type: String
+  NoEcho: true
+  Description: 'send gird api key'
+GoogleOauthClientId:
+  Type: String
+  NoEcho: true
+  Description: 'Google Sign-in OAuth Web Id'
+Domain:
+  Type: String
+  Description: 'domain for building url'

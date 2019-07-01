@@ -1,0 +1,17 @@
+Resources:
+  MediaS3PutDeletePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Sub: '${StageName}-public-s3-put-delete'
+      PolicyDocument:
+        Statement:
+          - Sid: PutDeletePerm
+            Effect: Allow
+            Action:
+              - 's3:ListBucket'
+              - 's3:PutObject'
+            Resource:
+              Fn::Sub: '${MediaDataS3BucketArn}/*'
+      Roles:
+        - Ref: AddFileRole

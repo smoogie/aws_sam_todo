@@ -1,0 +1,43 @@
+Resources:
+  EditUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-edit-user-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  EditUserFunction:
+    DependsOn: EditUserRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-edit-user'
+    Properties:
+      Role:
+        Fn::Sub: '${EditUserRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/users/edit.handler
+      Layers:
+        - Ref: MainDependenciesLayer
+      Events:
+        ApiAction:
+          Type: Api
+          Properties:
+            Path: /
+            Method: put
+            RestApiId:
+              Ref: UsersApi
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

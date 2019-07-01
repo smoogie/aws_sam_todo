@@ -1,0 +1,43 @@
+Resources:
+  RegisterUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-register-user-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  RegisterUserFunction:
+    DependsOn: RegisterUserRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-register-user'
+    Properties:
+      Role:
+        Fn::Sub: '${RegisterUserRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/auth/register.handler
+      Layers:
+        - Ref: MainDependenciesLayer
+      Events:
+        ApiAction:
+          Type: Api
+          Properties:
+            Path: /register
+            Method: post
+            RestApiId:
+              Ref: AuthApi
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

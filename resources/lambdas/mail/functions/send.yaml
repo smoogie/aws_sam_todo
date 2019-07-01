@@ -1,0 +1,43 @@
+Resources:
+  SendMailRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-send-mail-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
+  SendMailFunction:
+    DependsOn: SendMailRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-send-mail'
+    Properties:
+      Role:
+        Fn::Sub: '${SendMailRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/mail/send.handler
+      Layers:
+        - Ref: MainDependenciesLayer
+      Events:
+        MySQSEvent:
+          Type: SQS
+          Properties:
+            Queue:
+              Ref: MailSQSArn
+            BatchSize: 1
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

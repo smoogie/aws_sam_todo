@@ -1,0 +1,86 @@
+paths:
+  /:
+    post:
+      produces:
+        - application/json
+      responses:
+        201:
+          description: 'A JSON with info about new todo list'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ListAddResponse'
+        403:
+          description: '403 response'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorResponse'
+        422:
+          description: '422 response'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorResponse'
+        500:
+          description: '500 response'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorResponse'
+      parameters:
+        - in: body
+          name: 'params'
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: aws
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddTodoListFunction.Arn}/invocations"
+        responses:
+          .*"statusCode":403.*:
+            statusCode: '403'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          .*"statusCode":404.*:
+            statusCode: '404'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          .*"statusCode":422.*:
+            statusCode: '422'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          .*"statusCode":500.*:
+            statusCode: '500'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          default:
+            statusCode: '201'
+            responseTemplates:
+              application/json: "$input.path('$.body')"
+        passthroughBehavior: when_no_templates
+        requestTemplates:
+          application/json: >
+            #set($allParams = $input.params())
+            {
+            "bodyJson" : $input.json('$'),
+            "context" : {
+                "userId" : "$context.authorizer.principalId"
+            }
+            }

@@ -1,0 +1,308 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  todo-app
+  Network SAM Template for Todo app
+
+Parameters:
+  # deploy settings
+  StageName:
+    Type: String
+    Description: 'Application stage to deploy e.g. dev, test, production'
+    Default: 'dev'
+Outputs:
+  PrivateSubnet1:
+    Value:
+      Ref: PrivateSubnet1
+  PrivateSubnet2:
+    Value:
+      Ref: PrivateSubnet2
+  PrivateSubnet3:
+    Value:
+      Ref: PrivateSubnet3
+  PublicSubnet1:
+    Value:
+      Ref: PublicSubnet1
+  PublicSubnet2:
+    Value:
+      Ref: PublicSubnet2
+  PublicSubnet3:
+    Value:
+      Ref: PublicSubnet3
+  RDSSecurityGroup:
+    Value:
+      Ref: RDSSecurityGroup
+  LambdaSecurityGroup:
+    Value:
+      Ref: LambdaSecurityGroup
+  EC2SecurityGroup:
+    Value:
+      Ref: EC2SecurityGroup
+Resources:
+  # VPC configuration
+  MainVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+  # Subnet for VPC
+  PrivateSubnet1:
+    DependsOn: MainVPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.0.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PrivateSubnet2:
+    DependsOn: MainVPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.16.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PrivateSubnet3:
+    DependsOn: MainVPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.32.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 2
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PublicSubnet1:
+    DependsOn: MainVPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.48.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PublicSubnet2:
+    DependsOn: MainVPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.64.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  PublicSubnet3:
+    DependsOn: MainVPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      CidrBlock: 172.31.80.0/20
+      AvailabilityZone:
+        Fn::Select:
+          - 2
+          - Fn::GetAZs:
+              Ref: AWS::Region
+  # RouteTable
+  PrivateRouteTable:
+    DependsOn: MainVPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: MainVPC
+  PublicRouteTable:
+    DependsOn: MainVPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: MainVPC
+  # Route Subnet association
+  PrivateSubnet1RouteTableAssociation:
+    DependsOn:
+      - PrivateRouteTable
+      - PrivateSubnet1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet1
+      RouteTableId:
+        Ref: PrivateRouteTable
+  PrivateSubnet2RouteTableAssociation:
+    DependsOn:
+      - PrivateRouteTable
+      - PrivateSubnet2
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet2
+      RouteTableId:
+        Ref: PrivateRouteTable
+  PrivateSubnet3RouteTableAssociation:
+    DependsOn:
+      - PrivateRouteTable
+      - PrivateSubnet3
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet3
+      RouteTableId:
+        Ref: PrivateRouteTable
+  PublicSubnet1RouteTableAssociation:
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicSubnet2RouteTableAssociation:
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet2
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet2
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicSubnet3RouteTableAssociation:
+    DependsOn:
+      - PublicRouteTable
+      - PublicSubnet3
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet3
+      RouteTableId:
+        Ref: PublicRouteTable
+  # InternetGateway for VPC
+  InternetGateway:
+    DependsOn: MainVPC
+    Type: AWS::EC2::InternetGateway
+  AttachInternetGateway:
+    DependsOn:
+      - MainVPC
+      - InternetGateway
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: MainVPC
+      InternetGatewayId:
+        Ref: InternetGateway
+  # NAT and Elastic IP for VPC
+  EIP:
+    DependsOn:
+      - MainVPC
+      - AttachInternetGateway
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NAT:
+    DependsOn:
+      - AttachInternetGateway
+      - PublicSubnet1
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::Sub: '${EIP.AllocationId}'
+      SubnetId:
+        Ref: PublicSubnet1
+  # Route Subnet association
+  RouteToInternetGateway:
+    DependsOn:
+      - PublicSubnet1RouteTableAssociation
+      - PublicSubnet2RouteTableAssociation
+      - PublicSubnet3RouteTableAssociation
+      - PrivateSubnet1RouteTableAssociation
+      - PrivateSubnet2RouteTableAssociation
+      - PrivateSubnet3RouteTableAssociation
+      - AttachInternetGateway
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  RouteToNAT:
+    DependsOn:
+      - PrivateRouteTable
+      - NAT
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NAT
+  #securityGroups
+  LambdaSecurityGroup:
+    DependsOn:
+      - PrivateSubnet1RouteTableAssociation
+      - PrivateSubnet2RouteTableAssociation
+      - PrivateSubnet3RouteTableAssociation
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName:
+        Fn::Sub: '${StageName}-lambda-security-group'
+      GroupDescription: 'Lambda security group'
+      VpcId:
+        Ref: MainVPC
+  RDSSecurityGroup:
+    DependsOn:
+      - LambdaSecurityGroup
+      - EC2SecurityGroup
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName:
+        Fn::Sub: '${StageName}-rds-security-group'
+      GroupDescription: 'RDS security group'
+      VpcId:
+        Ref: MainVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId:
+            Ref: LambdaSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId:
+            Ref: EC2SecurityGroup
+  EC2SecurityGroup:
+    DependsOn: LambdaSecurityGroup
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName:
+        Fn::Sub: '${StageName}-ec2-security-group'
+      GroupDescription: 'EC2 security group'
+      VpcId:
+        Ref: MainVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "0.0.0.0/0"

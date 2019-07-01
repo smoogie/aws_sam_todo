@@ -1,0 +1,43 @@
+Resources:
+  VersionValidationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-version-validation-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  VersionValidationFunction:
+    DependsOn: VersionValidationRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-version-validate'
+    Properties:
+      Role:
+        Fn::Sub: '${VersionValidationRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/versions/validate.handler
+      Layers:
+          - Ref: MainDependenciesLayer
+      Events:
+        AppVersionValidation:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+            RestApiId:
+              Ref: VersionsTodoApi
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

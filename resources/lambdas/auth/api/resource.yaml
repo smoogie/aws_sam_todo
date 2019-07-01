@@ -1,0 +1,11 @@
+Resources:
+  AuthApi:
+    DependsOn:
+      - AuthorizationFunction
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: 'Released'
+      Name:
+        Fn::Sub: '${StageName}-auth-todo-app'
+      DefinitionBody:
+        $include: ./api.yaml

@@ -1,0 +1,43 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: 'Files API'
+securityDefinitions:
+  TodoLambdaAuthorizer:
+    type: apiKey
+    name: 'Authorization'
+    in: header
+    x-amazon-apigateway-authtype: custom
+    x-amazon-apigateway-authorizer:
+      authorizerUri:
+        Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizationFunctionArn}/invocations'
+      authorizerResultTtlInSeconds: 0
+      type: token
+definitions:
+  FileResponse:
+    title: 'File response'
+    type: object
+    properties:
+      file:
+        type: string
+      name:
+        type: string
+  AddFileResponse:
+    title: 'add file response'
+    type: object
+    properties:
+      file:
+        type: object
+        properties:
+          id:
+            type: string
+      success:
+        type: boolean
+  ErrorResponse:
+    title: 'error responses'
+    type: object
+    required:
+      - errors
+    properties:
+      errors:
+        type: object

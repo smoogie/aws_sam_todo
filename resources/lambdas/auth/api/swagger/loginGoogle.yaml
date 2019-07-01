@@ -1,0 +1,94 @@
+paths:
+  /login/google:
+    post:
+      produces:
+        - application/json
+      responses:
+        200:
+          description: 'A JSON with tokens'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/TokenResponse'
+        401:
+          description: 'Error response'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorResponse'
+        422:
+          description: 'Error response'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorResponse'
+        500:
+          description: 'Error response'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorResponse'
+      parameters:
+        - in: body
+          name: 'googleIdToken'
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: 'lang'
+          required: false
+          schema:
+            type: string
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        type: aws
+        uri:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginGoogleFunction.Arn}/invocations'
+        responses:
+          .*"statusCode":401.*:
+            statusCode: '401'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          .*"statusCode":422.*:
+            statusCode: '422'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          .*"statusCode":500.*:
+            statusCode: '500'
+            responseTemplates:
+              application/json: "$input.path('$.errorMessage')"
+          default:
+            statusCode: '200'
+            responseTemplates:
+              application/json: "$input.path('$.body')"
+        passthroughBehavior: when_no_templates
+        requestTemplates:
+          application/json: >
+            #set($allParams = $input.params())
+            {
+            "bodyJson" : $input.json('$'),
+            "params" : {
+            #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+            "$type" : {
+                #foreach($paramName in $params.keySet())
+                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                    #if($foreach.hasNext),#end
+                #end
+            }
+                #if($foreach.hasNext),#end
+            #end
+            }
+            }

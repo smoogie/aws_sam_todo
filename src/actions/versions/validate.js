@@ -1,24 +1,29 @@
-const db = require('../../utils/db_connection');
+const ResponseBuilder = require('../../Utils/ResponseBuilder/ResponseBuilder');
+const Validator = require('../../Validators/Validator');
+const versionRepo = require('../../storage/VersionRepoConstructor');
 
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
+  if (event.keep_alive_request) {
+    return {};
+  }
   let accepted = false;
-  const { version } = event.params.querystring;
   try {
-    const connection = await db.connect();
-    const [rows, fields] = await connection.execute('SELECT * FROM `system_versions` WHERE `version` = ?', [version]);
-    if (rows !== undefined && rows != null && rows.length > 0) {
+    const { version, system } = event.params.querystring;
+    const validation = Validator({
+      version:['required'],
+      system:['required']
+    });
+    const sanitized = validation.validate({system, version});
+    const systemVersion = await versionRepo.find(sanitized.system, sanitized.version);
+    if (!systemVersion) {
+      ResponseBuilder.notFound();
+    }
+    const minVersion = await versionRepo.getMinVersion(sanitizedData.system);
+    if (minVersion instanceof Version || minVersion.weight <= systemVersion.weight) {
       accepted = true;
     }
-    connection.end();
   } catch (error) {
-    console.log(error);
+    ResponseBuilder.handleError(error);
   }
-
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      accepted
-    })
-  };
-  return response;
+  return ResponseBuilder.success({ accepted });
 };

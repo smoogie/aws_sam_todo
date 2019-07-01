@@ -2,14 +2,443 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: >
   todo-app
-  Main SAM Template for todo app
+  Main SAM Template for Todo app
 
-# Param definition
 Parameters:
   $include: ./config/params.yaml
-# Global configuration
-Globals:
-  $include: ./config/globals.yaml
-# Outputs values
-Outputs:
-  $include: ./config/outputs.yaml
+
+Resources:
+  # NETWORK
+  NetworkStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "other/network.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+  # RDS
+  RDSStack:
+    DependsOn: NetworkStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "other/rds.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        DBUser:
+          Ref: DBUser
+        DBName:
+          Ref: DBName
+        DBPassword:
+          Ref: DBPassword
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        RDSSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.RDSSecurityGroup}'
+        PublicSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PublicSubnet1}'
+        EC2SecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.EC2SecurityGroup}'
+        DBProxyKeyPair:
+          Ref: DBProxyKeyPair
+  # SQS
+  SQSStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "other/sqs.yaml"
+      TimeoutInMinutes: 60
+    Parameters:
+      StageName:
+        Ref: StageName
+  # LAYERS
+  LayersStack:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "other/layers.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+  # S3
+  S3Stack:
+    DependsOn:
+      - LayersStack
+      - SQSStack
+      - RDSStack
+      - NetworkStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "s3/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        DataS3BucketName:
+          Ref: DataS3BucketName
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        ImageUrlSQSArn:
+          Fn::Sub: '${SQSStack.Outputs.ImageUrlSQSArn}'
+        ImageUrlSQS:
+          Fn::Sub: '${SQSStack.Outputs.ImageUrlSQS}'
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+  # MIGRATIONS
+  MigrationsStack:
+    DependsOn:
+      - RDSStack
+      - NetworkStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "migrations/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        DeployVersion:
+          Ref: DeployVersion
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        PassSalt:
+          Ref: PassSalt
+        MigrationsDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MigrationsDependenciesLayer}'
+  # MAIL LAMBDAS
+  MailLambdaStack:
+    DependsOn:
+      - MigrationsStack
+      - SQSStack
+      - NetworkStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "lambdas/mail/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        Domain:
+          Ref: Domain
+        SendGridKey:
+          Ref: SendGridKey
+        MailFromEmail:
+          Ref: MailFromEmail
+        MailFromName:
+          Ref: MailFromName
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        MailSQS:
+          Fn::Sub: '${SQSStack.Outputs.MailSQS}'
+        MailSQSArn:
+          Fn::Sub: '${SQSStack.Outputs.MailSQSArn}'
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+  # API LAMBDAS
+  AuthStack:
+    DependsOn:
+      - MailLambdaStack
+      - SQSStack
+      - NetworkStack
+      - RDSStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "lambdas/auth/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        PassSalt:
+          Ref: PassSalt
+        MailSQS:
+          Fn::Sub: '${SQSStack.Outputs.MailSQS}'
+        GoogleOauthClientId:
+          Ref: GoogleOauthClientId
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+  ToDoLambdaStack:
+    DependsOn:
+      - AuthStack
+      - RDSStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "lambdas/todo/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        AuthorizationFunctionArn:
+          Fn::Sub: '${AuthStack.Outputs.AuthorizationFunctionArn}'
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+        DataS3BucketName:
+          Ref: DataS3BucketName
+  ToDoListLambdaStack:
+    DependsOn:
+      - AuthStack
+      - ToDoLambdaStack
+      - RDSStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "lambdas/todoList/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        AuthorizationFunctionArn:
+          Fn::Sub: '${AuthStack.Outputs.AuthorizationFunctionArn}'
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+        DataS3BucketName:
+          Ref: DataS3BucketName
+  UsersStack:
+    DependsOn:
+      - AuthStack
+      - ToDoListLambdaStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "lambdas/users/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        AuthorizationFunctionArn:
+          Fn::Sub: '${AuthStack.Outputs.AuthorizationFunctionArn}'
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        MailSQS:
+          Fn::Sub: '${SQSStack.Outputs.MailSQS}'
+        PassSalt:
+          Ref: PassSalt
+        DataS3BucketName:
+          Ref: DataS3BucketName
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+  FilesLambdaStack:
+    DependsOn:
+      - AuthStack
+      - UsersStack
+      - RDSStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "lambdas/files/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        AuthorizationFunctionArn:
+          Fn::Sub: '${AuthStack.Outputs.AuthorizationFunctionArn}'
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+        DataS3BucketName:
+          Ref: DataS3BucketName
+  VersionsLambdaStack:
+    DependsOn:
+      - AuthStack
+      - FilesLambdaStack
+      - RDSStack
+      - LayersStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "lambdas/versions/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        AuthorizationFunctionArn:
+          Fn::Sub: '${AuthStack.Outputs.AuthorizationFunctionArn}'
+        DBUser:
+          Ref: DBUser
+        DBPassword:
+          Ref: DBPassword
+        DBName:
+          Ref: DBName
+        TodoDBEndpointAddress:
+          Fn::Sub: '${RDSStack.Outputs.TodoDBEndpointAddress}'
+        LambdaSecurityGroup:
+          Fn::Sub: '${NetworkStack.Outputs.LambdaSecurityGroup}'
+        PrivateSubnet1:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet1}'
+        PrivateSubnet2:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet2}'
+        PrivateSubnet3:
+          Fn::Sub: '${NetworkStack.Outputs.PrivateSubnet3}'
+        MainDependenciesLayer:
+          Fn::Sub: '${LayersStack.Outputs.MainDependenciesLayer}'
+  # POLICIES
+  PoliciesStack:
+    DependsOn:
+      - S3Stack
+      - RDSStack
+      - SQSStack
+      - UsersStack
+      - ToDoListLambdaStack
+      - ToDoLambdaStack
+      - AuthStack
+      - FilesLambdaStack
+      - VersionsLambdaStack
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: "policies/main.yaml"
+      TimeoutInMinutes: 60
+      Parameters:
+        StageName:
+          Ref: StageName
+        # SQS
+        ImageUrlSQSArn:
+          Fn::Sub: '${SQSStack.Outputs.ImageUrlSQSArn}'
+        MailSQSArn:
+          Fn::Sub: '${SQSStack.Outputs.MailSQSArn}'
+        # S3
+        MediaDataS3BucketArn:
+          Fn::Sub: '${S3Stack.Outputs.MediaDataS3BucketArn}'
+        ImageThumbnailRole:
+          Fn::Sub: '${S3Stack.Outputs.ImageThumbnailRole}'
+        # Auth
+        RegisterUserRole:
+          Fn::Sub: '${AuthStack.Outputs.RegisterUserRole}'
+        ForgetPasswordRequestRole:
+          Fn::Sub: '${AuthStack.Outputs.ForgetPasswordRequestRole}'
+        # Files
+        AddFileRole:
+          Fn::Sub: '${FilesLambdaStack.Outputs.AddFileRole}'
+        DeleteFileRole:
+          Fn::Sub: '${FilesLambdaStack.Outputs.DeleteFileRole}'
+        DownloadFileRole:
+          Fn::Sub: '${FilesLambdaStack.Outputs.DownloadFileRole}'
+        # Todo
+        DeleteTodoRole:
+          Fn::Sub: '${ToDoLambdaStack.Outputs.DeleteTodoRole}'
+        # TodoList
+        DeleteTodoListRole:
+          Fn::Sub: '${ToDoListLambdaStack.Outputs.DeleteTodoListRole}'
+        # User
+        EditUserRole:
+          Fn::Sub: '${UsersStack.Outputs.EditUserRole}'
+        DeleteUserRole:
+          Fn::Sub: '${UsersStack.Outputs.DeleteUserRole}'
+
+

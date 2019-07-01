@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  todo-app
+  Mail SAM Template for Todo app
+
+Parameters:
+  # deploy settings
+  StageName:
+    Type: String
+    Description: 'Application stage to deploy e.g. dev, test, production'
+    Default: 'dev'
+  # network settings
+  LambdaSecurityGroup:
+    Type: String
+    Description: 'Lambda Security Group'
+  PrivateSubnet1:
+    Type: String
+    Description: 'Private Subnet 1'
+  PrivateSubnet2:
+    Type: String
+    Description: 'Private Subnet 2'
+  PrivateSubnet3:
+    Type: String
+    Description: 'Private Subnet 3'
+  # mail settings
+  MailFromEmail:
+    Type: String
+    Description: 'App mail address (use in mails options)'
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: 'Must be a valid email address'
+  MailFromName:
+    Type: String
+    Description: 'App mail name (use in mails options)'
+    Default: 'Todo App'
+  MailSQS:
+    Type: String
+    Description: 'Mails SQS'
+  MailSQSArn:
+    Type: String
+    Description: 'Mails SQS Arn'
+  SendGridKey:
+    Type: String
+    NoEcho: true
+    Description: 'send gird api key'
+  # url settings
+  Domain:
+    Type: String
+    Description: 'domain for building url'
+    # node dependencies
+  MainDependenciesLayer:
+    Type: String
+    Description: 'Todo layers with node dependencies'
+Globals:
+  Function:
+    Runtime: nodejs10.x
+    VpcConfig:
+      SecurityGroupIds:
+        - Ref: LambdaSecurityGroup
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+        - Ref: PrivateSubnet3
+    Environment:
+      Variables:
+        MAIL_FROM_EMAIL:
+          Ref: MailFromEmail
+        MAIL_FROM_NAME:
+          Ref: MailFromName
+        SQS_MAIL_URL:
+          Ref: MailSQS
+        SENDGRID_KEY:
+          Ref: SendGridKey
+        DOMAIN:
+          Ref: Domain

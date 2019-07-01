@@ -1,3 +1,7 @@
+const accessTokenRepo = require('../../storage/accessTokens/AccessTokenRepoConstructor');
+const AccessToken = require('../../storage/accessTokens/AccessToken');
+const Validator = require('../../Validators/Validator');
+
 function authResponse(principalId, methodArn, allowed = false) {
   return {
     principalId,
@@ -14,25 +18,31 @@ function authResponse(principalId, methodArn, allowed = false) {
   };
 }
 
-function getUserId(token) {
-  let id = null;
-  if (token) {
-    id = "11223";
-  }
-  return id;
+async function getUserId(token) {
+    let id = null;
+    const tokenObj = await accessTokenRepo.find(token);
+    if (token instanceof AccessToken) {
+      id = tokenObj.user_id;
+    }
+    return id;
 }
 
 exports.handler = async (event, context) => {
+  if (event.keep_alive_request) { return {}; }
   try {
     const { authorizationToken, methodArn } = event;
-    if (authorizationToken.length === 0) {
-      context.fail('Unauthorized');
-      return null;
+    const validation = new Validator({authorizationToken:['required', 'text']});
+    let token = null;
+    try {
+      validation.validate({authorizationToken});
+      token = validation.sanitizedData.authorizationToken;
+    } catch(error){
+        context.fail('Unauthorized');
+        return null;
     }
-    const principalId = getUserId(authorizationToken);
+    const principalId = getUserId(token);
     const allowed = principalId !== null;
-    const policy = authResponse(principalId, methodArn, allowed);
-    return policy;
+    return authResponse(principalId, methodArn, allowed);
   } catch (error) {
     console.log(error);
     context.fail('Internal Server Error');

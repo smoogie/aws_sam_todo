@@ -1,0 +1,16 @@
+Resources:
+  ImageUrlUpdateSQSSendPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Sub: '${StageName}-image-url-sqs-send'
+      PolicyDocument:
+        Statement:
+          - Sid: SendMessageUrlPerm
+            Effect: Allow
+            Action:
+              - 'sqs:SendMessage'
+            Resource:
+              Ref: ImageUrlSQSArn
+      Roles:
+        - Ref: ImageThumbnailRole

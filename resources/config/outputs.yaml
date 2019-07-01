@@ -1,9 +1,0 @@
-ApiUri:
-  Value:
-    Fn::Sub: 'https://${ToDoApi}.execute-api.${AWS::Region}.amazonaws.com/Released'
-DB:
-  Value:
-    Fn::Sub: '${ToDoDB.Endpoint.Address}'
-PublicS3:
-  Value:
-    Fn::Sub: 'https://s3.${AWS::Region}.amazonaws.com/${PublicDataS3Bucket}'

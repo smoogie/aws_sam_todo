@@ -1,0 +1,18 @@
+Resources:
+  MailSQSSendPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Sub: '${StageName}-mail-sqs-send'
+      PolicyDocument:
+        Statement:
+          - Sid: SendMessageMailPerm
+            Effect: Allow
+            Action:
+              - 'sqs:SendMessage'
+            Resource:
+              Ref: MailSQSArn=
+      Roles:
+        - Ref: RegisterUserRole
+        - Ref: ForgetPasswordRequestRole
+        - Ref: EditUserRole

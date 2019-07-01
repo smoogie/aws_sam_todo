@@ -1,0 +1,20 @@
+Resources:
+  MediaS3GetPutPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Sub: '${StageName}-public-s3-get-put'
+      PolicyDocument:
+        Statement:
+          - Sid: PutGetPerm
+            Effect: Allow
+            Action:
+              - 's3:ListBucket'
+              - 's3:GetObject'
+              - 's3:GetObjectTagging'
+              - 's3:PutObject'
+              - 's3:PutObjectTagging'
+            Resource:
+              Fn::Sub: '${MediaDataS3BucketArn}/*'
+      Roles:
+        - Ref: ImageThumbnailRole

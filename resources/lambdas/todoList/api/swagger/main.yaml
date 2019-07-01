@@ -1,0 +1,56 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: 'ToDo List API'
+securityDefinitions:
+  TodoLambdaAuthorizer:
+    type: apiKey
+    name: 'Authorization'
+    in: header
+    x-amazon-apigateway-authtype: custom
+    x-amazon-apigateway-authorizer:
+      authorizerUri:
+        Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizationFunctionArn}/invocations'
+      authorizerResultTtlInSeconds: 0
+      type: token
+definitions:
+  ListsResponse:
+    title: 'lists response'
+    type: object
+    properties:
+      lists:
+        type: array
+  ListResponse:
+    title: 'list response'
+    type: object
+    properties:
+      list:
+        type: object
+        properties:
+          title:
+            type: string
+          created_at:
+            type: string
+          elements:
+            type: array
+  ListAddResponse:
+    title: 'list add response'
+    type: object
+    properties:
+      list:
+        type: object
+        properties:
+          title:
+            type: string
+          created_at:
+            type: string
+      success:
+        type: boolean
+  ErrorResponse:
+    title: 'error responses'
+    type: object
+    required:
+      - errors
+    properties:
+      errors:
+        type: object

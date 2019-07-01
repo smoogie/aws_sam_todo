@@ -1,0 +1,30 @@
+Resources:
+  ImageThumbnailRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-thumbnail-image-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  ImageThumbnailFunction:
+    DependsOn: ImageThumbnailRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-thumbnail-image'
+    Properties:
+      Role:
+        Fn::Sub: '${ImageThumbnailRole.Arn}'
+      CodeUri: ../../src
+      Handler: actions/s3/thumbnail.handler
+      Layers:
+          - Ref: MainDependenciesLayer

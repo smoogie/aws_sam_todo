@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  todo-app
+  Policies SAM Template for Todo app
+
+Parameters:
+  # deploy settings
+  StageName:
+    Type: String
+    Description: 'Application stage to deploy e.g. dev, test, production'
+    Default: 'dev'
+  # sqs settings
+  ImageUrlSQSArn:
+    Type: String
+    Description: 'Image SQS Arn'
+  MailSQSArn:
+    Type: String
+    Description: 'Mail SQS Arn'
+  # s3 settings
+  MediaDataS3BucketArn:
+    Type: String
+    Description: 'Media Bucket Arn'
+  ImageThumbnailRole:
+    Type: String
+    Description: 'Image thumbnail Role Ref'

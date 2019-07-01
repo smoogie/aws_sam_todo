@@ -1,0 +1,51 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: 'Auth Todo API'
+definitions:
+  UserRegisterResponse:
+    title: 'user register response'
+    type: object
+    properties:
+      user:
+        type: object
+      success:
+        type: boolean
+  UserResponse:
+    title: 'user response'
+    type: object
+    properties:
+      id:
+        type: number
+      email:
+        type: string
+      status:
+        type: number
+  TokenResponse:
+    title: 'token response'
+    type: object
+    required:
+      - access_token
+      - token_type
+      - expires_in
+      - refresh_token
+      - scope
+    properties:
+      access_token:
+        type: string
+      token_type:
+        type: string
+      expires_in:
+        type: number
+      refresh_token:
+        type: string
+      scope:
+        type: string
+  ErrorResponse:
+    title: 'error responses'
+    type: object
+    required:
+      - errors
+    properties:
+      errors:
+        type: object

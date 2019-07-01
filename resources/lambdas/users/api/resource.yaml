@@ -1,0 +1,18 @@
+Resources:
+  UsersApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: 'Released'
+      Name:
+        Fn::Sub: '${StageName}-users-todo-app'
+      Auth:
+        DefaultAuthorizer: TodoLambdaAuthorizer
+        Authorizers:
+          TodoLambdaAuthorizer:
+            FunctionPayloadType: TOKEN
+            Identity:
+              ReauthorizeEvery: 0
+            FunctionArn:
+              Ref: AuthorizationFunctionArn
+      DefinitionBody:
+        $include: ./api.yaml

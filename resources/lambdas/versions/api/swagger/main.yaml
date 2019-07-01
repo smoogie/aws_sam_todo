@@ -1,0 +1,21 @@
+swagger: '2.0'
+info:
+  version: '0.1'
+  title: 'Versions Todo API'
+definitions:
+  VersionResponse:
+    title: 'version response'
+    type: object
+    required:
+      - accepted
+    properties:
+      accepted:
+        type: bool
+  ErrorResponse:
+    title: 'error responses'
+    type: object
+    required:
+      - errors
+    properties:
+      errors:
+        type: object

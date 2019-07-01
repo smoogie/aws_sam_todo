@@ -1,4 +1,3 @@
 /node_modules/*
-/database/node_modules/*
-/src/node_modules/*
+/layers/*
 /test/*

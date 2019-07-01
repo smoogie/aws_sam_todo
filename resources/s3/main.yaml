@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  todo-app
+  S3 SAM Template for Todo app
+
+Parameters:
+  # deploy settings
+  StageName:
+    Type: String
+    Description: 'Application stage to deploy e.g. dev, test, production'
+    Default: 'dev'
+  # db configuration
+  DBName:
+    Type: String
+    Description: 'your db name'
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: 'Must begin with a letter and contain only alphanumeric characters.'
+  DBUser:
+    Type: String
+    NoEcho: true
+    Description: 'your db user'
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: 'Must begin with a letter and contain only alphanumeric characters.'
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Description: 'your db password'
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: 'Must contain only alphanumeric characters.'
+  TodoDBEndpointAddress:
+    Type: String
+    Description: 'Todo DB Endpoint Address'
+  # network settings
+  LambdaSecurityGroup:
+    Type: String
+    Description: 'Lambda Security Group'
+  PrivateSubnet1:
+    Type: String
+    Description: 'Private Subnet 1'
+  PrivateSubnet2:
+    Type: String
+    Description: 'Private Subnet 2'
+  PrivateSubnet3:
+    Type: String
+    Description: 'Private Subnet 3'
+  # sqs settings
+  ImageUrlSQSArn:
+    Type: String
+    Description: 'Image SQS ARN'
+  ImageUrlSQS:
+    Type: String
+    Description: 'Image Url SQS'
+  # s3 settings
+  DataS3BucketName:
+    Type: String
+    Description: 'S3 bucket foe data saved by users'
+  # node dependencies
+  MainDependenciesLayer:
+    Type: String
+    Description: 'Todo layers with node dependencies'
+Outputs:
+  MediaDataS3BucketArn:
+    Value:
+      Fn::Sub: '${MediaDataS3Bucket.Arn}'
+  ImageThumbnailRole:
+   Value:
+     Ref: ImageThumbnailRole
+Globals:
+  Function:
+    Runtime: nodejs10.x
+    VpcConfig:
+      SecurityGroupIds:
+        - Ref: LambdaSecurityGroup
+      SubnetIds:
+        - Ref: PrivateSubnet1
+        - Ref: PrivateSubnet2
+        - Ref: PrivateSubnet3
+    Environment:
+      Variables:
+        DB_HOST:
+          Ref: TodoDBEndpointAddress
+        DB_USER:
+          Ref: DBUser
+        DB_PASSWORD:
+          Ref: DBPassword
+        DB_NAME:
+          Ref: DBName
+        SQS_IMAGE_URL:
+          Ref: ImageUrlSQS
+        S3_PUBLIC_DATA:
+          Ref: DataS3BucketName
+        DEPLOYMENT_REGION:
+          Ref: AWS::Region

@@ -1,0 +1,21 @@
+Resources:
+  MediaS3DeletePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Sub: '${StageName}-public-s3-delete'
+      PolicyDocument:
+        Statement:
+          - Sid: DeletePerm
+            Effect: Allow
+            Action:
+              - 's3:ListBucket'
+              - 's3:DeleteObject'
+              - 's3:DeleteObjects'
+            Resource:
+              Fn::Sub: '${MediaDataS3BucketArn}/*'
+      Roles:
+        - Ref: DeleteUserRole
+        - Ref: DeleteTodoListRole
+        - Ref: DeleteTodoRole
+        - Ref: DeleteFileRole

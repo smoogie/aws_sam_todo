@@ -1,7 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  todo-app
+  SQS SAM Template for Todo app
+
+Parameters:
+  # deploy settings
+  StageName:
+    Type: String
+    Description: 'Application stage to deploy e.g. dev, test, production'
+    Default: 'dev'
+Outputs:
+  MailSQS:
+    Value:
+      Ref: MailSQS
+  MailSQSArn:
+    Value:
+      Fn::Sub: '${MailSQS.Arn}'
+  ImageUrlSQS:
+    Value:
+      Ref: ImageUrlSQS
+  ImageUrlSQSArn:
+    Value:
+      Fn::Sub: '${ImageUrlSQS.Arn}'
 Resources:
-  # SQS for mails
-  MialSQS:
+  MailSQS:
     Type: AWS::SQS::Queue
     Properties:
+      VisibilityTimeout: 100
       QueueName:
-        Fn::Sub: '${StageName}-todo-test-mail'
+        Fn::Sub: '${StageName}-todo-mail'
+  ImageUrlSQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 100
+      QueueName:
+        Fn::Sub: '${StageName}-todo-image-url'

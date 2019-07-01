@@ -1,0 +1,35 @@
+Resources:
+  DeleteUnverifiedUsersRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-delete-unverified-users-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  DeleteUnverifiedUsersFunction:
+    DependsOn: DeleteUnverifiedUsersRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-delete-unverified-users'
+    Properties:
+      Role:
+        Fn::Sub: '${DeleteUnverifiedUsersRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/users/deleteUnverifiedUsers.handler
+      Layers:
+          - Ref: MainDependenciesLayer
+      Events:
+        Cron:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 day)

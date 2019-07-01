@@ -15,6 +15,7 @@ module.exports = {
   rules: {
     'no-unused-vars': [1],
     'comma-dangle': [2,'never'],
-    'no-console': [0]
+    'no-console': [0],
+    'max-len': [0]
   }
 };

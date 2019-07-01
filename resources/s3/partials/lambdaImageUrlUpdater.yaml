@@ -1,0 +1,39 @@
+Resources:
+  ImageUrlUpdateRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-update-image-url-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
+  ImageUrlUpdateFunction:
+    DependsOn: ImageUrlUpdateRole
+    Type: "AWS::Serverless::Function"
+    Name:
+      Fn::Sub: '${StageName}-update-image-url'
+    Properties:
+      Timeout: 90
+      Role:
+        Fn::Sub: '${ImageUrlUpdateRole.Arn}'
+      CodeUri: ../../src
+      Handler: actions/s3/imageUrlUpdater.handler
+      Layers:
+          - Ref: MainDependenciesLayer
+      Events:
+        MySQSEvent:
+          Type: SQS
+          Properties:
+            Queue:
+              Ref: ImageUrlSQSArn
+            BatchSize: 1

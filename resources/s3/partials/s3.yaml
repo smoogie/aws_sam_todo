@@ -1,0 +1,46 @@
+Resources:
+  LambdaInvokePermission:
+    DependsOn: ImageThumbnailFunction
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Fn::Sub: '${ImageThumbnailFunction.Arn}'
+      Action: 'lambda:InvokeFunction'
+      Principal: s3.amazonaws.com
+      SourceAccount:
+        Ref: 'AWS::AccountId'
+      SourceArn:
+        Fn::Sub: 'arn:aws:s3:::${DataS3BucketName}'
+  MediaDataS3Bucket:
+    DependsOn: LambdaInvokePermission
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Ref: DataS3BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Function:
+              Fn::Sub: '${ImageThumbnailFunction.Arn}'
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: 'origin'
+                  - Name: suffix
+                    Value: '.jpg'
+          - Event: 's3:ObjectCreated:*'
+            Function:
+              Fn::Sub: '${ImageThumbnailFunction.Arn}'
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: 'origin'
+                  - Name: suffix
+                    Value: '.png'

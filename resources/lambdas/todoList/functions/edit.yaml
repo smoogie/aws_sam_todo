@@ -1,0 +1,43 @@
+Resources:
+  EditTodoListRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: '${StageName}-edit-todo-list-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  EditTodoListFunction:
+    DependsOn: EditTodoListRole
+    Type: AWS::Serverless::Function
+    Name:
+      Fn::Sub: '${StageName}-edit-todo-list'
+    Properties:
+      Role:
+        Fn::Sub: '${EditTodoListRole.Arn}'
+      CodeUri: ../../../src
+      Handler: actions/todoList/edit.handler
+      Layers:
+        - Ref: MainDependenciesLayer
+      Events:
+        ApiAction:
+          Type: Api
+          Properties:
+            Path: /{listId}
+            Method: put
+            RestApiId:
+              Ref: ToDoListApi
+        KeepAlive:
+          Type: Schedule
+          Properties:
+            Input: '{"keep_alive_request":true}'
+            Schedule: rate(10 minutes)

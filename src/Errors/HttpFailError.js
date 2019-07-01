@@ -1,0 +1,1 @@
+class HttpFailError extends Error {}

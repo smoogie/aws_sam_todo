@@ -1,10 +1,103 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  todo-app
+  RDS SAM Template for Todo app
+
+Mappings:
+  AWSInstanceType2Arch:
+    t2.micro:
+      Arch: HVM64
+  AWSRegionArch2AMI:
+    us-east-1:
+      HVM64: ami-6869aa05
+    us-west-2:
+      HVM64: ami-7172b611
+    us-west-1:
+      HVM64: ami-31490d51
+    eu-west-1:
+      HVM64: ami-f9dd458a
+    eu-west-2:
+      HVM64: ami-886369ec
+    eu-central-1:
+      HVM64: ami-ea26ce85
+    ap-northeast-1:
+      HVM64: ami-374db956
+    ap-northeast-2:
+      HVM64: ami-2b408b45
+    ap-southeast-1:
+      HVM64: ami-a59b49c6
+    ap-southeast-2:
+      HVM64: ami-dc361ebf
+    ap-south-1:
+      HVM64: ami-ffbdd790
+    us-east-2:
+      HVM64: ami-f6035893
+    ca-central-1:
+      HVM64: ami-730ebd17
+    sa-east-1:
+      HVM64: ami-6dd04501
+    cn-north-1:
+      HVM64: ami-8e6aa0e3
+Parameters:
+  # deploy settings
+  StageName:
+    Type: String
+    Description: 'Application stage to deploy e.g. dev, test, production'
+    Default: 'dev'
+  # db configuration
+  DBName:
+    Type: String
+    Description: 'your db name'
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: 'Must begin with a letter and contain only alphanumeric characters.'
+  DBUser:
+    Type: String
+    NoEcho: true
+    Description: 'your db user'
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: 'Must begin with a letter and contain only alphanumeric characters.'
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Description: 'your db password'
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: 'Must contain only alphanumeric characters.'
+  # network settings
+  RDSSecurityGroup:
+    Type: String
+    Description: 'RDS Security Group'
+  EC2SecurityGroup:
+    Type: String
+    Description: 'EC2 Security Group'
+  PrivateSubnet1:
+    Type: String
+    Description: 'Private subnet 1'
+  PrivateSubnet2:
+    Type: String
+    Description: 'Private subnet 2'
+  PrivateSubnet3:
+    Type: String
+    Description: 'Private subnet 3'
+  PublicSubnet1:
+    Type: String
+    Description: 'Public Subnet 1'
+  # DB proxy config
+  DBProxyKeyPair:
+    Type: String
+    Description: 'name of pair key in EC2 KeyPair service'
+Outputs:
+  TodoDBEndpointAddress:
+    Value:
+      Fn::Sub: '${TodoDB.Endpoint.Address}'
 Resources:
-  # RDS Subnet Group
   DBSubnetGroup:
-    DependsOn:
-      - PrivateSubnet1RouteTableAssociation
-      - PrivateSubnet2RouteTableAssociation
-      - PrivateSubnet3RouteTableAssociation
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupName:
@@ -15,11 +108,9 @@ Resources:
         - Ref: PrivateSubnet2
         - Ref: PrivateSubnet3
   # RDS Configuration
-  ToDoDB:
+  TodoDB:
     DependsOn:
      - DBSubnetGroup
-     - RDSSecurityGroup
-     - AttachInternetGateway
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: 20
@@ -38,3 +129,27 @@ Resources:
         Ref: DBSubnetGroup
       VPCSecurityGroups:
         - Ref: RDSSecurityGroup
+  # EC2 instance
+  DBAccessPointEC2:
+    DependsOn:
+      - TodoDB
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName:
+        Ref: DBProxyKeyPair
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet:
+            - Ref: EC2SecurityGroup
+          SubnetId:
+            Ref: PublicSubnet1
+      ImageId:
+        Fn::FindInMap:
+          - AWSRegionArch2AMI
+          - Ref: AWS::Region
+          - Fn::FindInMap:
+              - AWSInstanceType2Arch
+              - t2.micro
+              - Arch

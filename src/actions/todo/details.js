@@ -1,11 +1,9 @@
-const db = require('../../utils/db_connection');
+const ResponseBuilder = require('../../Utils/ResponseBuilder');
 
 exports.handler = async (event, context) => {
-    const { userId } = event.context;
-    const { todoId } = event.params.path;
-    const response = {
-        statusCode: 200,
-        body: ""
-    };
-    return response;
+    if (event.keep_alive_request) { return {}; }
+    //TODO: verify ownership
+    //TODO: get item details
+    //TODO: return response
+    return ResponseBuilder.success({success: true});
 };
