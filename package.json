@@ -14,7 +14,7 @@
         "merge-yaml-cli": "^1.1.2",
         "mysql2": "^1.6.5",
         "pug": "^2.0.3",
-        "sequelize": "^4.43.0",
+        "sequelize": "^5.15.1",
         "umzug": "^2.2.0",
         "watch": "^1.0.2",
         "yamlinc": "^0.1.8"
