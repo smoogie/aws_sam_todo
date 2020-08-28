@@ -1,3 +1,5 @@
+WIP - I started this project long time ago and did not have time to finish it. It i smissing mall funcitonality and configuration, only general skeleton is ready.
+
 # aws_sam_todo repo
 This repo contain example of simple to do serverless app on AWS. This repo present general configuration for serverless app (monolithic app) and how to connect pieces, it is not focused on javascript code and logic... 
 
